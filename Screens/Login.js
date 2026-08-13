@@ -5,12 +5,12 @@ import { auth, database, signInWithEmailAndPassword, signOut } from "../firebase
 import { doc, getDoc } from "firebase/firestore";
 import Entypo from '@expo/vector-icons/Entypo';
 
-const imagemDesktop = require("../Images/roupa2.png");
-const imagemMobile = require("../Images/roupa2Mobile.png");
+const imagemDesktop = require("../Images/logo.png");
+const imagemMobile = require("../Images/logo.png");
 
 
 const abrirInstagram = async () => {
-  const url = 'https://www.instagram.com/bellaplusmulherao/';
+  const url = 'https://www.instagram.com/vidapark/';
   const supported = await Linking.canOpenURL(url);
   if (supported) {
     await Linking.openURL(url);
@@ -73,16 +73,7 @@ export default function Login({ navigation }) {
     <ImageBackground source={imagemFundo} style={styles.fundo} resizeMode='cover'>
       <View style={styles.overlay}>
 
-        <View style={styles.logoContainer}>
-          <Image
-            style={{
-              width: width < 600 ? width * 1.05 : width * 1.05,
-              height: width < 600 ? 180 : 220,
-              resizeMode: 'contain'
-            }}
-            source={require('../Images/logo.png')}
-          />
-        </View>
+        
 
         <TextInput
           style={styles.barra}
@@ -105,13 +96,12 @@ export default function Login({ navigation }) {
             <Entypo
               name={mostrarSenha ? "eye-with-line" : "eye"}
               size={24}
-              color="#e58aaa"
+              color="#852b4aff"
             />
           </TouchableOpacity>
         </View>
 
-        <Button style={styles.button} buttonColor="#e58aaa" textColor="#8b3151" mode='contained' onPress={EntrarConta}>
-          Entrar
+        <Button style={styles.button} buttonColor="#852b4aff" textColor="#ffffffff" mode='contained' onPress={EntrarConta}>Entrar
         </Button>
 
         <TouchableOpacity onPress={() => navigation.navigate('Cadastrar')}>
@@ -123,8 +113,8 @@ export default function Login({ navigation }) {
 
         <View style={styles.footer}>
           <TouchableOpacity style={styles.instagramContainer} onPress={abrirInstagram}>
-            <Entypo name="instagram-with-circle" size={24} color="#e58aaa" />
-            <Text style={styles.instagramText}>@bellaplusmulherao</Text>
+            <Entypo name="instagram-with-circle" size={24} color="#852b4aff" />
+            <Text style={styles.instagramText}>@VidaPark</Text>
           </TouchableOpacity>
         </View>
 
@@ -139,14 +129,15 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-  overlay: {
-    flex: 1,
-    width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: 40,
-    backgroundColor: 'rgba(0,0,0,0.35)',
-  },
+ overlay: {
+  flex: 1,
+  width: '100%',
+  justifyContent: 'flex-start',
+  alignItems: 'center',
+  paddingTop: 420, 
+  paddingBottom: 40,
+  backgroundColor: 'rgba(0,0,0,0.35)',
+},
   logoContainer: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -189,7 +180,7 @@ const styles = StyleSheet.create({
   },
   cadastro: {
     fontWeight: 'bold',
-    color: '#e58aaa',
+    color: '#af1e51ff',
   },
   footer: {
     position: 'absolute',
@@ -205,6 +196,6 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#e58aaa',
+    color: '#53162bff',
   },
 });

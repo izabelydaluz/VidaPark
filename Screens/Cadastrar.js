@@ -7,12 +7,12 @@ import Entypo from "@expo/vector-icons/Entypo";
 import { auth, database, createUserWithEmailAndPassword } from "../firebaseConfig";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
  
-const imagemDesktop = require("../Images/roupa2.png");
-const imagemMobile = require("../Images/roupa2Mobile.png");
+const imagemDesktop = require("../Images/logo.png");
+const imagemMobile = require("../Images/logo.png");
  
  
 const abrirInstagram = async () => {
-  const url = "https://www.instagram.com/bellaplusmulherao/";
+  const url = "https://www.instagram.com/vidapark/";
  
   const supported = await Linking.canOpenURL(url);
  
@@ -26,10 +26,8 @@ const abrirInstagram = async () => {
  
 export default function Cadastrar({ navigation }) {
  
-  const { width, height } = useWindowDimensions();
-  const imagemFundo = width < 600
-    ? imagemMobile
-    : imagemDesktop;
+ const { width, height } = useWindowDimensions();
+  const imagemFundo = width < 600 ? imagemMobile : imagemDesktop;
  
  
   const [email, setEmail] = useState("");
@@ -87,17 +85,9 @@ export default function Cadastrar({ navigation }) {
     <ImageBackground source={imagemFundo} style={styles.fundo} resizeMode="stretch">
      <View style={styles.overlay}>
  
-        <View style={styles.logoContainer}>
-          <Image
-            style={{
-              width: width < 600 ? width * 0.80 : width * 0.35,
-              height: height < 600 ? 160 : 220,
-              resizeMode: "contain"
-            }}
-            source={require("../Images/logo.png")}
-          />
-        </View>
- 
+        
+ <TextInput style={styles.barra} placeholder="Nome" placeholderTextColor="#666" />
+
         <TextInput style={styles.barra} placeholder="E-mail" placeholderTextColor="#666" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none"/>
  
         <View style={styles.inputSenha}>
@@ -107,7 +97,7 @@ export default function Cadastrar({ navigation }) {
             <Entypo
               name={mostrarSenha ? "eye-with-line" : "eye"}
               size={24}
-              color="#e58aaa"
+              color="#852b4aff"
             />
           </TouchableOpacity>
         </View>
@@ -119,12 +109,12 @@ export default function Cadastrar({ navigation }) {
             <Entypo
               name={mostrarConfirmacao ? "eye-with-line" : "eye"}
               size={24}
-              color="#e58aaa"
+              color="#852b4aff"
             />
           </TouchableOpacity>
         </View>
  
-        <Button mode="contained" buttonColor="#e58aaa" textColor="#8b3151" style={styles.botao} onPress={CriarConta}>Cadastrar</Button>
+        <Button mode="contained" buttonColor="#852b4aff" textColor="#ffffffff" style={styles.botao} onPress={CriarConta}>Cadastrar</Button>
  
         <View style={styles.footer}>
  
@@ -132,9 +122,9 @@ export default function Cadastrar({ navigation }) {
             <Entypo
               name="instagram-with-circle"
               size={24}
-              color="#e58aaa"
+              color="#852b4aff"
             />
-            <Text style={styles.instagramText}>@bellaplusmulherao</Text>
+            <Text style={styles.instagramText}>@VidaPark</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -151,13 +141,14 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   overlay: {
-    flex: 1,
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingBottom: 60,
-    backgroundColor: "rgba(0,0,0,0.35)",
-  },
+  flex: 1,
+  width: '100%',
+  justifyContent: 'flex-start',
+  alignItems: 'center',
+  paddingTop: 420, 
+  paddingBottom: 40,
+  backgroundColor: 'rgba(0,0,0,0.35)',
+},
   logoContainer: {
     justifyContent: "center",
     alignItems: "center",
@@ -203,7 +194,7 @@ const styles = StyleSheet.create({
   },
   instagramText: {
     marginLeft: 8,
-    color: "#e58aaa",
+    color: "#852b4aff",
     fontWeight: "bold",
     fontSize: 16,
   },
