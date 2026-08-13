@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body>
+<script>
+(function() {
+  var p = new URLSearchParams(location.search);
+  var status = p.get("status") || p.get("r") || "unknown";
+  var paymentId = p.get("payment_id") || "";
+  var data = JSON.stringify({ type:"checkout", status:status, paymentId:paymentId });
+  try { window.ReactNativeWebView.postMessage(data); } catch(e) { document.title="checkout:"+status; }
+})();
+</script>
+</body>
+</html>

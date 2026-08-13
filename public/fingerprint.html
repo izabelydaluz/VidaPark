@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+</head>
+<body>
+<script src="https://www.mercadopago.com/v2/security.js" data-max-retries="3"></script>
+<script>
+(function() {
+  var attempts = 0;
+  var maxAttempts = 30;
+
+  function getFP() {
+    if (window.MPDeviceFingerprint && typeof window.MPDeviceFingerprint.create === "function") {
+      window.MPDeviceFingerprint.create()
+        .then(function(fp) {
+          if (fp && fp.id) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({ type: "fp", id: fp.id }));
+          } else {
+            retry();
+          }
+        })
+        .catch(function(err) {
+          retry();
+        });
+    } else {
+      retry();
+    }
+  }
+
+  function retry() {
+    attempts++;
+    if (attempts < maxAttempts) {
+      setTimeout(getFP, 500);
+    }
+  }
+
+  setTimeout(getFP, 1500);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "mercadopago": {
+    "access_token": "APP_USR-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxxxxxxxxx",
+    "webhook_secret": "sua_chave_secreta_do_webhook"
+  }
+}

@@ -1,0 +1,210 @@
+import { TextInput, Text, StyleSheet, Alert, ImageBackground, View, TouchableOpacity, Linking, Image, useWindowDimensions } from "react-native";
+import { Button } from "react-native-paper";
+import { useState } from "react";
+import { auth, database, signInWithEmailAndPassword, signOut } from "../firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
+import Entypo from '@expo/vector-icons/Entypo';
+
+const imagemDesktop = require("../Images/roupa2.png");
+const imagemMobile = require("../Images/roupa2Mobile.png");
+
+
+const abrirInstagram = async () => {
+  const url = 'https://www.instagram.com/bellaplusmulherao/';
+  const supported = await Linking.canOpenURL(url);
+  if (supported) {
+    await Linking.openURL(url);
+  } else {
+    Alert.alert('Não foi possível abrir o Instagram');
+  }
+};
+
+export default function Login({ navigation }) {
+
+  const { width, height } = useWindowDimensions();
+  const imagemFundo = width < 600 ? imagemMobile : imagemDesktop;
+
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(true);
+
+
+  const EntrarConta = () => {
+    if (!email || !senha) {
+      Alert.alert("Aviso", "Preencha todos os campos");
+      return;
+    }
+
+    signInWithEmailAndPassword(auth, email.trim(), senha)
+      .then(async (userCredential) => {
+        const user = userCredential.user;
+
+        if (email.trim() === "admin@gmail.com" && senha === "1234567") {
+          navigation.navigate('ADM');
+          return;
+        }
+
+        try {
+          const clienteRef = doc(database, 'usuarios', user.uid);
+          const clienteSnap = await getDoc(clienteRef);
+
+          if (clienteSnap.exists()) {
+            const dadosCliente = clienteSnap.data();
+            if (dadosCliente.banido === true) {
+              await signOut(auth);
+              Alert.alert("Conta Bloqueada", "Você foi bloqueado e não pode acessar o aplicativo.");
+              return;
+            }
+          }
+          navigation.navigate('Catalog');
+        } catch (error) {
+          console.log(error);
+          navigation.navigate('Catalog');
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        Alert.alert("Erro", "E-mail ou senha incorretos.");
+      });
+  };
+
+
+  return (
+    <ImageBackground source={imagemFundo} style={styles.fundo} resizeMode='cover'>
+      <View style={styles.overlay}>
+
+        <View style={styles.logoContainer}>
+          <Image
+            style={{
+              width: width < 600 ? width * 1.05 : width * 1.05,
+              height: width < 600 ? 180 : 220,
+              resizeMode: 'contain'
+            }}
+            source={require('../Images/logo.png')}
+          />
+        </View>
+
+        <TextInput
+          style={styles.barra}
+          placeholder='Usuario'
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+        />
+
+        <View style={styles.senha}>
+          <TextInput
+            style={styles.input}
+            placeholder='Senha'
+            value={senha}
+            onChangeText={setSenha}
+            secureTextEntry={mostrarSenha}
+          />
+          <TouchableOpacity onPress={() => setMostrarSenha(!mostrarSenha)}>
+            <Entypo
+              name={mostrarSenha ? "eye-with-line" : "eye"}
+              size={24}
+              color="#e58aaa"
+            />
+          </TouchableOpacity>
+        </View>
+
+        <Button style={styles.button} buttonColor="#e58aaa" textColor="#8b3151" mode='contained' onPress={EntrarConta}>
+          Entrar
+        </Button>
+
+        <TouchableOpacity onPress={() => navigation.navigate('Cadastrar')}>
+          <Text style={styles.textoConta}>
+            Não possui uma conta ainda?
+            <Text style={styles.cadastro}> Cadastre-se</Text>
+          </Text>
+        </TouchableOpacity>
+
+        <View style={styles.footer}>
+          <TouchableOpacity style={styles.instagramContainer} onPress={abrirInstagram}>
+            <Entypo name="instagram-with-circle" size={24} color="#e58aaa" />
+            <Text style={styles.instagramText}>@bellaplusmulherao</Text>
+          </TouchableOpacity>
+        </View>
+
+      </View>
+    </ImageBackground>
+  );
+}
+
+const styles = StyleSheet.create({
+  fundo: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  overlay: {
+    flex: 1,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 40,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+  },
+  logoContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 0,
+    marginTop: -20,
+  },
+  barra: {
+    width: '80%',
+    maxWidth: 350,
+    padding: 12,
+    borderRadius: 12,
+    marginVertical: 8,
+    backgroundColor: 'rgba(255,255,255,0.73)',
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+    color: '#333',
+  },
+  senha: {
+    width: '80%',
+    maxWidth: 350,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    marginVertical: 8,
+    backgroundColor: 'rgba(255,255,255,0.73)',
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  input: {
+    flex: 1,
+    paddingVertical: 12,
+    color: '#333',
+  },
+  button: {
+    margin: 10,
+  },
+  textoConta: {
+    color: '#FFFFFF',
+  },
+  cadastro: {
+    fontWeight: 'bold',
+    color: '#e58aaa',
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  instagramContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  instagramText: {
+    marginLeft: 8,
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#e58aaa',
+  },
+});

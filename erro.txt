@@ -1,0 +1,3 @@
+ WARN  [expo-image-picker] `ImagePicker.MediaTypeOptions` have been deprecated. Use `ImagePicker.MediaType` or an array of `ImagePicker.MediaType` instead.
+ WARN  `setBehaviorAsync` is not supported with edge-to-edge enabled.
+ WARN  `setBehaviorAsync` is not supported with edge-to-edge enabled.

@@ -1,0 +1,16 @@
+{
+  "name": "bellaplus-payments",
+  "version": "1.0.0",
+  "description": "Firebase Cloud Functions for Mercado Pago payments",
+  "main": "index.js",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions"
+  },
+  "dependencies": {
+    "firebase-functions": "^6.3.2",
+    "firebase-admin": "^13.1.0",
+    "axios": "^1.7.9"
+  },
+  "private": true
+}
