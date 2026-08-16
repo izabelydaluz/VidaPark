@@ -7,9 +7,9 @@ import * as NavigationBar from "expo-navigation-bar";
 import Entypo from '@expo/vector-icons/Entypo';
  
 import Login from './Screens/Login'
-import Catalog from "./Screens/Catalog";
-import Favorites from "./Screens/Favorites";
-import Cart from "./Screens/Cart";
+
+
+
 import ADM from "./Screens/adm";
 import GerenciarProduto from "./Screens/GerenciarProduto";
 import AddProdutos from "./Screens/AddProduto";
@@ -26,6 +26,12 @@ import Addresses from './Screens/Addresses';
 import Settings from './Screens/Settings';
 import GerenciarCliente from './Screens/GerenciarCliente';
 import GerenciarVendas from "./Screens/GerenciarVendas";
+import Home from "./Screens/Home";
+import CatalogoSalgados from "./Screens/CatalogoSalgados";
+import MonteSeuCombo from "./Screens/MonteSeuCombo";
+import Carrinho from "./Screens/Carrinho";
+import Checkout from "./Screens/Checkout";
+import MeusPedidos from "./Screens/MeusPedidos";
  
 function TabNavigate() {
   const Tab = createBottomTabNavigator();
@@ -46,23 +52,40 @@ function TabNavigate() {
         tabBarInactiveTintColor: theme.textMuted,
       }}
     >
-      <Tab.Screen name="Catalogo" component={Catalog}
+
+      
+
+
+      <Tab.Screen name="Home" component={Home}
         options={{
           headerShown: false,
           tabBarIcon: ({ color }) => (
-            <Entypo name="globe" size={20} color={color} />
+            <Entypo name="home" size={20} color={color} />
           )
         }} />
- 
-      <Tab.Screen name="Favoritos" component={Favorites}
+
+        <Tab.Screen name="Catalogo" component={CatalogoSalgados}
         options={{
           headerShown: false,
           tabBarIcon: ({ color }) => (
-            <Entypo name="heart" size={20} color={color} />
+            <Entypo name="shopping-bag" size={20} color={color} />
+            
           )
         }} />
+
+        <Tab.Screen name="Combo" component={MonteSeuCombo}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color }) => (
+            <Entypo name="shop" size={20} color={color} />
+          )
+        }} />
+        
+       
  
-      <Tab.Screen name="Carrinho" component={Cart}
+      
+ 
+      <Tab.Screen name="Carrinho" component={Carrinho}
         options={{
           headerShown: false,
           tabBarIcon: ({ color }) => (
@@ -111,6 +134,22 @@ function AppContent() {
           cardStyle: { backgroundColor: theme.background },
         }}
       >
+
+        <Stack.Screen name="Home" component={TabNavigate} options={{
+          headerShown: false
+        }} />
+
+        <Stack.Screen name="catalogo" component={TabNavigate} options={{
+          headerShown: false
+        }} />
+
+        <Stack.Screen name="Combo" component={TabNavigate} options={{
+          headerShown: false
+        }} />
+
+
+
+
         <Stack.Screen name="Login" component={Login} options={{
           headerShown: false
         }} />
@@ -151,12 +190,27 @@ function AppContent() {
         <Stack.Screen name="EditProduct" component={EditProduct} options={{
           headerShown: false
         }} />
-        <Stack.Screen name="Catalog" component={TabNavigate} options={{
+
+
+        
+
+
+
+
+
+
+
+
+        
+        <Stack.Screen name="Checkout" component={Checkout} options={{
           headerShown: false
         }} />
-        <Stack.Screen name="Pagamento" component={Pagamento} options={{
+
+        <Stack.Screen name="MeusPedidos" component={MeusPedidos} options={{
           headerShown: false
         }} />
+
+
         <Stack.Screen name="EditProfile" component={EditProfile} options={{
           headerShown: false
         }} />

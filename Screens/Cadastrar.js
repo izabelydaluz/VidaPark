@@ -86,7 +86,7 @@ export default function Cadastrar({ navigation }) {
      <View style={styles.overlay}>
  
         
- <TextInput style={styles.barra} placeholder="Nome" placeholderTextColor="#666" />
+        <TextInput style={styles.barra} placeholder="Nome" placeholderTextColor="#666" />
 
         <TextInput style={styles.barra} placeholder="E-mail" placeholderTextColor="#666" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none"/>
  

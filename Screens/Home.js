@@ -1,0 +1,226 @@
+import React from "react";
+import { View, ScrollView, Text, TouchableOpacity, ImageBackground, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+
+// ─────────────────────────────────────────────
+// PALETA "VIDA PARK"
+// Mude aqui se algum tom precisar de ajuste.
+// ─────────────────────────────────────────────
+const COLORS = {
+  azulVidaPark: "#202040",   // Fundo, cabeçalho, rodapé
+  rosaVidaPark: "#E84890",   // Botões, títulos, ícones e destaques
+  branco: "#F8F8F8",         // Textos, fundos e contraste
+  rosaClaro: "#F7A8C8",      // Hover, detalhes e fundos suaves
+  azulSuave: "#34345C",      // Cards, seções e elementos secundários
+  rosaEscuro: "#C93678",     // Hover dos botões e elementos de destaque
+  textoSecundario: "#6B6B85",
+  textoMutado: "#B3B3C6",
+};
+
+// Troque pelas imagens reais do seu projeto (require('../assets/...') ou uma URL do Firebase Storage)
+const IMG_PACOTES = { uri: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600" };
+const IMG_SALGADOS = { uri: "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=600" };
+
+export default function Home({ navigation }) {
+  // Mock -- troque pelos dados reais (auth.currentUser, Firestore, etc.)
+  const userName = "Maria";
+  const nextEvent = { title: "Aniversário do João", date: "25/05/2025", daysLeft: 12 };
+
+  return (
+    <View style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        {/* ───── HEADER ───── */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.greeting}>Olá, {userName}! 👋</Text>
+            <Text style={styles.subGreeting}>Seja bem-vinda de volta</Text>
+          </View>
+
+          <TouchableOpacity style={styles.bellButton} onPress={() => navigation.navigate("Notifications")}>
+            <Ionicons name="notifications-outline" size={20} color={COLORS.branco} />
+          </TouchableOpacity>
+        </View>
+
+        {/* ───── CARD: PRÓXIMO EVENTO ───── */}
+        <View style={styles.eventCard}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.eventLabel}>Próximo evento</Text>
+            <Text style={styles.eventTitle}>{nextEvent.title}</Text>
+            <Text style={styles.eventDate}>{nextEvent.date}</Text>
+          </View>
+
+          <View style={styles.countdownBadge}>
+            <Text style={styles.countdownNumber}>{nextEvent.daysLeft}</Text>
+            <Text style={styles.countdownLabel}>dias</Text>
+          </View>
+        </View>
+
+        {/* ───── SEÇÃO: O QUE VOCÊ DESEJA ───── */}
+        <Text style={styles.sectionTitle}>O que você deseja?</Text>
+
+        {/* Card 1 -- Pacotes de Festa */}
+        <TouchableOpacity
+          activeOpacity={0.85}
+          style={styles.bannerCard}
+          onPress={() => navigation.navigate("PacotesDeFesta")}
+        >
+          <ImageBackground source={IMG_PACOTES} style={styles.bannerImage} imageStyle={styles.bannerImageRadius}>
+            <View style={[styles.bannerOverlay, { backgroundColor: "rgba(232,72,144,0.55)" }]}>
+              <Ionicons name="gift-outline" size={18} color={COLORS.branco} style={{ marginBottom: 4 }} />
+              <Text style={styles.bannerTitle}>PACOTES DE FESTA</Text>
+              <Text style={styles.bannerSubtitle}>Espaço + estrutura para seu evento</Text>
+            </View>
+          </ImageBackground>
+        </TouchableOpacity>
+
+        {/* Card 2 -- Salgados Avulsos */}
+        <TouchableOpacity
+          activeOpacity={0.85}
+          style={styles.bannerCard}
+          onPress={() => navigation.navigate("Catalogo")}
+        >
+          <ImageBackground source={IMG_SALGADOS} style={styles.bannerImage} imageStyle={styles.bannerImageRadius}>
+            <View style={[styles.bannerOverlay, { backgroundColor: "rgba(32,32,64,0.55)" }]}>
+              <Ionicons name="fast-food-outline" size={18} color={COLORS.branco} style={{ marginBottom: 4 }} />
+              <Text style={styles.bannerTitle}>SALGADOS AVULSOS</Text>
+              <Text style={styles.bannerSubtitle}>Encomende seus salgados favoritos</Text>
+            </View>
+          </ImageBackground>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.branco,
+  },
+  scrollContent: {
+    paddingBottom: 30,
+  },
+
+  // Header
+  header: {
+    backgroundColor: COLORS.azulVidaPark,
+    paddingTop: 55,
+    paddingHorizontal: 20,
+    paddingBottom: 28,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  greeting: {
+    color: COLORS.branco,
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  subGreeting: {
+    color: COLORS.rosaClaro,
+    fontSize: 13,
+    marginTop: 2,
+  },
+  bellButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: COLORS.azulSuave,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  // Event card
+  eventCard: {
+    marginHorizontal: 20,
+    marginTop: -20,
+    backgroundColor: COLORS.branco,
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+  },
+  eventLabel: {
+    color: COLORS.textoMutado,
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  eventTitle: {
+    color: COLORS.azulVidaPark,
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  eventDate: {
+    color: COLORS.textoSecundario,
+    fontSize: 12,
+    marginTop: 2,
+  },
+  countdownBadge: {
+    backgroundColor: COLORS.rosaVidaPark,
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    alignItems: "center",
+    minWidth: 54,
+  },
+  countdownNumber: {
+    color: COLORS.branco,
+    fontSize: 16,
+    fontWeight: "800",
+  },
+  countdownLabel: {
+    color: COLORS.rosaClaro,
+    fontSize: 10,
+  },
+
+  // Section
+  sectionTitle: {
+    color: COLORS.azulVidaPark,
+    fontSize: 17,
+    fontWeight: "700",
+    marginTop: 24,
+    marginHorizontal: 20,
+    marginBottom: 12,
+  },
+
+  // Banner cards
+  bannerCard: {
+    marginHorizontal: 20,
+    marginBottom: 14,
+    borderRadius: 18,
+    overflow: "hidden",
+  },
+  bannerImage: {
+    width: "100%",
+    height: 120,
+    justifyContent: "flex-end",
+  },
+  bannerImageRadius: {
+    borderRadius: 18,
+  },
+  bannerOverlay: {
+    padding: 14,
+    borderBottomLeftRadius: 18,
+    borderBottomRightRadius: 18,
+  },
+  bannerTitle: {
+    color: COLORS.branco,
+    fontSize: 16,
+    fontWeight: "800",
+    letterSpacing: 0.3,
+  },
+  bannerSubtitle: {
+    color: COLORS.branco,
+    fontSize: 11,
+    marginTop: 3,
+    opacity: 0.9,
+  },
+});
