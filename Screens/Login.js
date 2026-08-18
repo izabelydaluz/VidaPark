@@ -8,7 +8,6 @@ import Entypo from '@expo/vector-icons/Entypo';
 const imagemDesktop = require("../Images/logo.png");
 const imagemMobile = require("../Images/logo.png");
 
-
 const abrirInstagram = async () => {
   const url = 'https://www.instagram.com/vidapark/';
   const supported = await Linking.canOpenURL(url);
@@ -19,53 +18,77 @@ const abrirInstagram = async () => {
   }
 };
 
+// Mesma normalização usada no Cadastrar.js -- precisa gerar exatamente a mesma chave
+function gerarChaveNome(nome) {
+  return nome
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "-");
+}
+
 export default function Login({ navigation }) {
 
   const { width, height } = useWindowDimensions();
   const imagemFundo = width < 600 ? imagemMobile : imagemDesktop;
 
-  const [email, setEmail] = useState('');
+  const [nome, setNome] = useState('');
   const [senha, setSenha] = useState('');
   const [mostrarSenha, setMostrarSenha] = useState(true);
+  const [carregando, setCarregando] = useState(false);
 
 
-  const EntrarConta = () => {
-    if (!email || !senha) {
+  const EntrarConta = async () => {
+    if (!nome || !senha) {
       Alert.alert("Aviso", "Preencha todos os campos");
       return;
     }
 
-    signInWithEmailAndPassword(auth, email.trim(), senha)
-      .then(async (userCredential) => {
-        const user = userCredential.user;
+    setCarregando(true);
+    try {
+      // 1. Descobre o e-mail associado a esse nome
+      const chaveNome = gerarChaveNome(nome);
+      const nomeRef = doc(database, 'loginPorNome', chaveNome);
+      const nomeSnap = await getDoc(nomeRef);
 
-        if (email.trim() === "admin@gmail.com" && senha === "1234567") {
-          navigation.navigate('ADM');
+      if (!nomeSnap.exists()) {
+        Alert.alert("Erro", "Nome de usuário não encontrado.");
+        return;
+      }
+
+      const { email } = nomeSnap.data();
+
+      // 2. Loga normalmente no Firebase Auth com esse e-mail
+      const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+      const user = userCredential.user;
+
+      // 3. Confere status (banido/admin) no documento do usuário
+      const clienteRef = doc(database, 'usuarios', user.uid);
+      const clienteSnap = await getDoc(clienteRef);
+
+      if (clienteSnap.exists()) {
+        const dadosCliente = clienteSnap.data();
+
+        if (dadosCliente.banido === true) {
+          await signOut(auth);
+          Alert.alert("Conta Bloqueada", "Você foi bloqueado e não pode acessar o aplicativo.");
           return;
         }
 
-        try {
-          const clienteRef = doc(database, 'usuarios', user.uid);
-          const clienteSnap = await getDoc(clienteRef);
-
-          if (clienteSnap.exists()) {
-            const dadosCliente = clienteSnap.data();
-            if (dadosCliente.banido === true) {
-              await signOut(auth);
-              Alert.alert("Conta Bloqueada", "Você foi bloqueado e não pode acessar o aplicativo.");
-              return;
-            }
-          }
-          navigation.navigate('Catalog');
-        } catch (error) {
-          console.log(error);
-          navigation.navigate('Catalog');
+        if (dadosCliente.role === "admin") {
+          navigation.navigate('ADM');
+          return;
         }
-      })
-      .catch((error) => {
-        console.log(error);
-        Alert.alert("Erro", "E-mail ou senha incorretos.");
-      });
+      }
+
+      navigation.navigate('Catalog');
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Erro", "Nome de usuário ou senha incorretos.");
+    } finally {
+      setCarregando(false);
+    }
   };
 
 
@@ -73,15 +96,14 @@ export default function Login({ navigation }) {
     <ImageBackground source={imagemFundo} style={styles.fundo} resizeMode='cover'>
       <View style={styles.overlay}>
 
-        
+
 
         <TextInput
           style={styles.barra}
-          placeholder='Usuario'
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
+          placeholder='Nome de usuário'
+          value={nome}
+          onChangeText={setNome}
+          autoCapitalize="words"
         />
 
         <View style={styles.senha}>
@@ -101,7 +123,16 @@ export default function Login({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        <Button style={styles.button} buttonColor="#852b4aff" textColor="#ffffffff" mode='contained' onPress={EntrarConta}>Entrar
+        <Button
+          style={styles.button}
+          buttonColor="#852b4aff"
+          textColor="#ffffffff"
+          mode='contained'
+          onPress={EntrarConta}
+          loading={carregando}
+          disabled={carregando}
+        >
+          Entrar
         </Button>
 
         <TouchableOpacity onPress={() => navigation.navigate('Cadastrar')}>
@@ -134,7 +165,7 @@ const styles = StyleSheet.create({
   width: '100%',
   justifyContent: 'flex-start',
   alignItems: 'center',
-  paddingTop: 420, 
+  paddingTop: 420,
   paddingBottom: 40,
   backgroundColor: 'rgba(0,0,0,0.35)',
 },

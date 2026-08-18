@@ -135,17 +135,7 @@ function AppContent() {
         }}
       >
 
-        <Stack.Screen name="Home" component={TabNavigate} options={{
-          headerShown: false
-        }} />
-
-        <Stack.Screen name="catalogo" component={TabNavigate} options={{
-          headerShown: false
-        }} />
-
-        <Stack.Screen name="Combo" component={TabNavigate} options={{
-          headerShown: false
-        }} />
+        
 
 
 
@@ -195,7 +185,19 @@ function AppContent() {
         
 
 
+          <Stack.Screen name="Home" component={TabNavigate} options={{
+          headerShown: false
+        }} />
 
+        <Stack.Screen name="catalogo" component={TabNavigate} options={{
+          headerShown: false
+        }} />
+
+        <Stack.Screen name="Combo" component={TabNavigate} options={{
+          headerShown: false
+        }} />
+
+        
 
 
 
