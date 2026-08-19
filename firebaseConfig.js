@@ -1,6 +1,8 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+
+import {getAuth,onAuthStateChanged,signOut,updatePassword,reauthenticateWithCredential,EmailAuthProvider,} from "firebase/auth";
+
+import {getFirestore,addDoc,collection,} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
@@ -13,7 +15,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-export const auth = getAuth(app);
-export const database = getFirestore(app);
+const auth = getAuth(app);
+const database = getFirestore(app);
 
-export default app;
+export {app,auth,database,onAuthStateChanged,signOut,updatePassword,reauthenticateWithCredential,EmailAuthProvider,addDoc,collection,};

@@ -182,7 +182,7 @@ function AppContent() {
         }} />
 
 
-        
+    
 
 
           <Stack.Screen name="Home" component={TabNavigate} options={{
@@ -198,10 +198,6 @@ function AppContent() {
         }} />
 
         
-
-
-
-
 
         
         <Stack.Screen name="Checkout" component={Checkout} options={{
