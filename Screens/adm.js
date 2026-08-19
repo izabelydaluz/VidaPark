@@ -25,7 +25,7 @@ export default function ADM({ navigation }) {
       <View style={styles.grid}>
         
         <TouchableOpacity style={styles.card} activeOpacity={0.7} onPress={() => navigation.navigate('GerenciarCliente')}>
-          <IconButton icon="account-group" iconColor="#8b3151" size={40} pointerEvents="none" />
+          <IconButton icon="account-group" iconColor="#E84890" size={40} pointerEvents="none" />
           <Text style={styles.cardTxt}>Gerenciar Clientes</Text>
         </TouchableOpacity>
 
@@ -34,12 +34,12 @@ export default function ADM({ navigation }) {
           activeOpacity={0.7}
           onPress={() => navigation.navigate('GerenciarProduto')}
         >
-          <IconButton icon="package-variant-closed" iconColor="#8b3151" size={40} pointerEvents="none" />
+          <IconButton icon="package-variant-closed" iconColor="#E84890" size={40} pointerEvents="none" />
           <Text style={styles.cardTxt}>Gerenciar Produtos</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.cardLargo} activeOpacity={0.7} onPress={() => navigation.navigate('GerenciarVendas')}>
-          <IconButton icon="cash-register" iconColor="#8b3151" size={40} pointerEvents="none" />
+          <IconButton icon="cash-register" iconColor="#E84890" size={40} pointerEvents="none" />
           <Text style={styles.cardTxt}>Controle de Vendas</Text>
         </TouchableOpacity>
 
@@ -59,12 +59,12 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   txt: {
-    fontSize: 46,  
+    fontSize: 46,
     fontWeight: 'bold',
-    color: '#e58aaa',
+    color: '#E84890',
     textAlign: 'center',
     marginBottom: 40,
-    textShadowColor: 'rgba(0, 0, 0, 0.9)',
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 3, height: 3 },
     textShadowRadius: 6,
     letterSpacing: 2,
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#290814',
+    backgroundColor: '#202040',
     paddingTop: 40,
   },
   grid: {
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   card: {
-    backgroundColor: '#e58aaa',
+    backgroundColor: '#34345C',
     width: '47%',
     height: 140,
     borderRadius: 16,
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   cardLargo: {
-    backgroundColor: '#e58aaa',
+    backgroundColor: '#34345C',
     width: '100%',
     height: 120,
     borderRadius: 16,
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   cardTxt: {
-    color: '#8b3151',
+    color: '#F8F8F8',
     fontWeight: 'bold',
     fontSize: 14,
     textAlign: 'center',

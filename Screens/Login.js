@@ -1,7 +1,8 @@
 import { TextInput, Text, StyleSheet, Alert, ImageBackground, View, TouchableOpacity, Linking, Image, useWindowDimensions } from "react-native";
 import { Button } from "react-native-paper";
 import { useState } from "react";
-import { auth, database, signInWithEmailAndPassword, signOut } from "../firebaseConfig";
+import { auth, database } from "../firebaseConfig";
+import {signInWithEmailAndPassword,signOut} from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import Entypo from '@expo/vector-icons/Entypo';
 
@@ -82,7 +83,7 @@ export default function Login({ navigation }) {
         }
       }
 
-      navigation.navigate('Catalog');
+     navigation.navigate("Home")
     } catch (error) {
       console.log(error);
       Alert.alert("Erro", "Nome de usuário ou senha incorretos.");

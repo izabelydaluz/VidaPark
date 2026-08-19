@@ -4,7 +4,8 @@ import { TextInput, Text, StyleSheet, Alert, ImageBackground, View, TouchableOpa
 import { Button } from "react-native-paper";
 import Entypo from "@expo/vector-icons/Entypo";
 
-import { auth, database, createUserWithEmailAndPassword } from "../firebaseConfig";
+import { auth, database } from "../firebaseConfig";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 
 const imagemDesktop = require("../Images/logo.png");
@@ -32,16 +33,16 @@ function validarNome(nome) {
   if (!nomeLimpo) {
     return "Digite seu nome";
   }
+
   if (nomeLimpo.length < 3) {
     return "Nome muito curto";
   }
-  if (nomeLimpo.split(/\s+/).length < 2) {
-    return "Digite nome e sobrenome";
-  }
+
   if (!/^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/.test(nomeLimpo)) {
     return "Nome não pode conter números ou símbolos";
   }
-  return null; // válido
+
+  return null;
 }
 
 // Transforma "Maria Silva" em "maria-silva" -- usado como ID do documento

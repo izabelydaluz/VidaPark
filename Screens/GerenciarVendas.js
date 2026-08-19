@@ -213,7 +213,7 @@ export default function GerenciarVendas({ navigation }) {
             <View style={styles.botoesModal}>
               <Button 
                 mode="contained" 
-                buttonColor="#4CAF50" 
+                buttonColor="#E84890" 
                 style={styles.btnAcao}
                 onPress={() => {
                   if (vendaSelecionada) {
@@ -225,7 +225,7 @@ export default function GerenciarVendas({ navigation }) {
               </Button>
               <Button 
                 mode="contained" 
-                buttonColor="#f44336" 
+                buttonColor="#C93678" 
                 style={styles.btnAcao}
                 onPress={() => {
                   if (vendaSelecionada) {
@@ -254,11 +254,11 @@ export default function GerenciarVendas({ navigation }) {
 
 const styles = StyleSheet.create({
   txt: {
-    fontSize: 36,  
+    fontSize: 36,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 50,
-    textShadowColor: 'rgba(0, 0, 0, 0.9)',
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 3, height: 3 },
     textShadowRadius: 6,
     letterSpacing: 2,
@@ -304,13 +304,13 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   statusAprovado: {
-    color: '#4CAF50',
+    color: '#E84890',
   },
   statusPendente: {
-    color: '#e58aaa',
+    color: '#F7A8C8',
   },
   statusRecusado: {
-    color: '#f44336',
+    color: '#C93678',
   },
   vazioContainer: {
     flex: 1,
@@ -331,16 +331,16 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    backgroundColor: 'rgba(32, 32, 64, 0.85)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   reciboContainer: {
     width: '85%',
-    backgroundColor: '#FFF',
-    borderRadius: 4,
+    backgroundColor: '#F8F8F8',
+    borderRadius: 12,
     padding: 20,
-    shadowColor: '#000',
+    shadowColor: '#202040',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
@@ -352,11 +352,11 @@ const styles = StyleSheet.create({
   reciboTitulo: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#290814',
+    color: '#202040',
     letterSpacing: 1,
   },
   reciboLinha: {
-    color: '#888',
+    color: '#6B6B85',
     letterSpacing: 2,
     marginVertical: 5,
     textAlign: 'center',
@@ -366,25 +366,25 @@ const styles = StyleSheet.create({
   },
   reciboTextoLabel: {
     fontSize: 11,
-    color: '#888',
+    color: '#6B6B85',
     fontWeight: 'bold',
     marginTop: 10,
   },
   reciboTextoValor: {
     fontSize: 14,
-    color: '#290814',
+    color: '#202040',
     fontWeight: '500',
   },
   reciboTotalLabel: {
     fontSize: 13,
-    color: '#290814',
+    color: '#202040',
     fontWeight: 'bold',
     marginTop: 10,
     textAlign: 'center',
   },
   reciboTotalValor: {
     fontSize: 24,
-    color: '#8b3151',
+    color: '#E84890',
     fontWeight: 'bold',
     textAlign: 'center',
   },
@@ -405,5 +405,5 @@ const styles = StyleSheet.create({
   },
   btnFechar: {
     marginTop: 5,
-  },
+  }
 });

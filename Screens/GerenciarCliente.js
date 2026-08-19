@@ -135,11 +135,11 @@ export default function GerenciarCliente({ navigation }) {
 
 const styles = StyleSheet.create({
   txt: {
-    fontSize: 36,  
+    fontSize: 36,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 50,
-    textShadowColor: 'rgba(0, 0, 0, 0.9)',
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 3, height: 3 },
     textShadowRadius: 6,
     letterSpacing: 2,
@@ -175,10 +175,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   statusAtivo: {
-    color: '#4CAF50',
+    color: '#E84890',
   },
   statusBloqueado: {
-    color: '#f44336',
+    color: '#C93678',
   },
   vazioContainer: {
     flex: 1,

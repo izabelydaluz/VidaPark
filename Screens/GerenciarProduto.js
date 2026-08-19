@@ -49,8 +49,8 @@ export default function GerenciarProduto({ navigation }) {
       
       <Button 
         style={styles.button} 
-        buttonColor="#e58aaa" 
-        textColor="#8b3151" 
+        buttonColor="#E84890" 
+        textColor="#F8F8F8" 
         mode='contained' 
         onPress={AdicionarProdutos}
       >
@@ -77,7 +77,7 @@ export default function GerenciarProduto({ navigation }) {
             <View style={styles.vazioContainer}>
               <IconButton
                 icon="package-variant-closed-remove"
-                iconColor="#e58aaa"
+                iconColor="#E84890"
                 size={80}
                 style={styles.iconeVazio}
               />
@@ -92,19 +92,19 @@ export default function GerenciarProduto({ navigation }) {
 
 const styles = StyleSheet.create({
   txt: {
-    fontSize: 36,  
+    fontSize: 36,
     fontWeight: 'bold',
-    color: '#e58aaa',
+    color: '#E84890',
     textAlign: 'center',
     marginBottom: 50,
-    textShadowColor: 'rgba(0, 0, 0, 0.9)',
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 3, height: 3 },
     textShadowRadius: 6,
     letterSpacing: 2,
   },
   container: {
     flex: 1,
-    backgroundColor: '#290814',
+    backgroundColor: '#202040',
     paddingTop: 40,
   },
   button: {
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   },
   txtVazio: {
     fontSize: 18,
-    color: '#e58aaa',
+    color: '#F7A8C8',
     fontStyle: 'italic',
     textAlign: 'center',
     opacity: 0.8,

@@ -108,8 +108,8 @@ export default function AddProdutos({ navigation, route }) {
 
             <Button
                 style={styles.GaleriaButton}
-                buttonColor="#8b3151"
-                textColor="#ffffff"
+                buttonColor="#F7A8C8"
+                textColor="#8b3151"
                 mode='contained'
                 onPress={escolherImagem}
             >
@@ -121,8 +121,8 @@ export default function AddProdutos({ navigation, route }) {
             )}
 
             <View style={styles.colunaBotoes}>
-                <Button style={styles.button} buttonColor="#e58aaa" textColor="#8b3151" mode='contained' onPress={CadastrarProdutos}>Cadastrar</Button>
-                <Button style={styles.button} buttonColor="#e58aaa" textColor="#8b3151" mode='contained' onPress={() => navigation.goBack()}>Voltar</Button>
+                <Button style={styles.button} buttonColor="#E84890" textColor="#8b3151" mode='contained' onPress={CadastrarProdutos}>Cadastrar</Button>
+                <Button style={styles.button} buttonColor="#F7A8C8" textColor="#8b3151" mode='contained' onPress={() => navigation.goBack()}>Voltar</Button>
             </View>
         </View>
     );
@@ -132,10 +132,10 @@ const styles = StyleSheet.create({
     txt: {
         fontSize: 36,
         fontWeight: 'bold',
-        color: '#e58aaa',
+        color: '#E84890',
         textAlign: 'center',
         marginBottom: 30,
-        textShadowColor: 'rgba(0, 0, 0, 0.9)',
+        textShadowColor: 'rgba(0, 0, 0, 0.4)',
         textShadowOffset: { width: 3, height: 3 },
         textShadowRadius: 6,
         letterSpacing: 2,
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#290814',
+        backgroundColor: '#202040',
     },
     GaleriaButton: {
         width: 280,
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         marginVertical: 10,
         borderWidth: 1,
-        borderColor: '#e58aaa'
+        borderColor: '#F7A8C8',
     },
     button: {
         width: '100%',
@@ -174,31 +174,31 @@ const styles = StyleSheet.create({
         padding: 12,
         borderRadius: 12,
         marginVertical: 8,
-        backgroundColor: '#3d0c1e',
+        backgroundColor: '#34345C',
         borderWidth: 1,
-        borderColor: '#8b3151',
+        borderColor: '#E84890',
         alignSelf: 'center',
-        color: '#ffffff',
+        color: '#F8F8F8',
     },
     barraPicker: {
         width: 280,
         borderRadius: 12,
         marginVertical: 8,
         borderWidth: 1,
-        borderColor: '#8b3151',
+        borderColor: '#E84890',
         alignSelf: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
-        backgroundColor: '#3d0c1e',
+        backgroundColor: '#34345C',
     },
     picker: {
         width: '100%',
         height: 50,
-        color: '#e58aaa',
-        backgroundColor: '#3d0c1e',
+        color: '#F7A8C8',
+        backgroundColor: '#34345C',
     },
     itemPicker: {
-        backgroundColor: '#3d0c1e',
-        color: '#ffffff',
+        backgroundColor: '#34345C',
+        color: '#F8F8F8',
     }
 });
