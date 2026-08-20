@@ -12,7 +12,6 @@ export default function AddProdutos({ navigation, route }) {
     const { aoSalvar } = route.params || {};
     const [nome, setNome] = useState('');
     const [valor, setValor] = useState('');
-    const [tamanho, setTamanho] = useState('');
     const [descricao, setDescricao] = useState('');
     const [imagem, setImagem] = useState(null);
 
@@ -49,7 +48,6 @@ export default function AddProdutos({ navigation, route }) {
                 nome,
                 valor: parseFloat(valor),
                 imagem: imagemBase64,
-                tamanho,
                 descricao
             });
 
@@ -86,23 +84,6 @@ export default function AddProdutos({ navigation, route }) {
             <Text style={styles.txt}>Adicionar Produtos</Text>
 
             <TextInput style={styles.barra} placeholder="Nome" value={nome} onChangeText={setNome} placeholderTextColor={'#e58aaa'} />
-
-            <View style={styles.barraPicker}>
-                <Picker
-                    selectedValue={tamanho}
-                    onValueChange={(itemValue) => setTamanho(itemValue)}
-                    style={styles.picker}
-                    dropdownIconColor="#e58aaa"
-                    mode="dropdown"
-                >
-                    <Picker.Item label="Selecionar Tamanho" value="" color="#e58aaa" style={styles.itemPicker} />
-                    <Picker.Item label="P" value="P" color="#ffffff" style={styles.itemPicker} />
-                    <Picker.Item label="M" value="M" color="#ffffff" style={styles.itemPicker} />
-                    <Picker.Item label="G" value="G" color="#ffffff" style={styles.itemPicker} />
-                    <Picker.Item label="GG" value="GG" color="#ffffff" style={styles.itemPicker} />
-                </Picker>
-            </View>
-
             <TextInput style={styles.barra} placeholder="Valor" value={valor} onChangeText={setValor} placeholderTextColor={'#e58aaa'} />
             <TextInput style={styles.barra} placeholder="Descrição" value={descricao} onChangeText={setDescricao} placeholderTextColor={'#e58aaa'} />
 
