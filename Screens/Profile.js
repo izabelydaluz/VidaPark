@@ -261,6 +261,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "center",
+    
   },
   logoutText: {
     color: "#fff",

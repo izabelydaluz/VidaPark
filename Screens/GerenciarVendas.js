@@ -262,10 +262,13 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 3, height: 3 },
     textShadowRadius: 6,
     letterSpacing: 2,
+    
+    
   },
   container: {
     flex: 1,
     paddingTop: 40,
+    
   },
   cardContainer: {
     flex: 1,

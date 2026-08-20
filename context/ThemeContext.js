@@ -32,7 +32,7 @@ const lightTheme = {
   surface: "#FFFFFF",
 
   // Texto principal
-  text: COLORS.azulVidaPark,
+  text: COLORS.rosaVidaPark,
 
   // Textos secundários
   textSecondary: COLORS.textoSecundario,

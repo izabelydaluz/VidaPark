@@ -28,7 +28,8 @@ export default function Home({ navigation, route }) {
   // Mock -- troque pelos dados reais (auth.currentUser, Firestore, etc.)
   const userName = "Maria";
   const nextEvent = { title: "Aniversário do João", date: "25/05/2025", daysLeft: 12 };
-  const [showAbout, setShowAbout] = useState(route?.params?.showWelcomeModal || false);
+  // const [showAbout, setShowAbout] = useState(route?.params?.showWelcomeModal || false);
+  const [showAbout, setShowAbout] = useState(true);
   const [showContact, setShowContact] = useState(false);
 
   return (
