@@ -7,17 +7,14 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-
     "ios": {
       "supportsTablet": true
     },
-
     "android": {
       "package": "com.vidapark.app",
       "adaptiveIcon": {
@@ -26,17 +23,14 @@
       },
       "edgeToEdgeEnabled": true
     },
-
     "web": {
       "favicon": "./assets/favicon.png"
     },
-
     "extra": {
       "eas": {
-        "projectId": "58b10e3e-6412-4f2f-bc39-1111b21ed578"
+        "projectId": "45b0b9f8-742a-444c-8281-b465a2dff726"
       }
     },
-
-    "owner": "mateusdeboit"
+    "owner": "izahh"
   }
 }
