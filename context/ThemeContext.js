@@ -18,82 +18,79 @@ const COLORS = {
   bordaClara: "#EDEDF2",
 };
 
-// ─────────────────────────────────────────────
-// TEMA CLARO
-// ─────────────────────────────────────────────
-
 const lightTheme = {
   dark: false,
 
-  // Fundo geral
   background: COLORS.branco,
 
-  // Cards, inputs e superfícies
   surface: "#FFFFFF",
 
-  // Texto principal
   text: COLORS.rosaVidaPark,
 
-  // Textos secundários
+
   textSecondary: COLORS.textoSecundario,
 
-  // Textos mais apagados
   textMuted: COLORS.textoMutado,
 
-  // Cor principal
   primary: COLORS.azulVidaPark,
 
-  // Cor de destaque
+ 
   accent: COLORS.rosaVidaPark,
 
-  // Bordas
+
   border: COLORS.bordaClara,
 
-  // Sombra
   cardShadow: "#000000",
 
-  // Cores extras
+
+warningBackground: "#FFF6E0",
+warningBorder: "#F4D998",
+warningText: "#9A7B1E",
+
+
   pink: COLORS.rosaVidaPark,
   lightPink: COLORS.rosaClaro,
   darkPink: COLORS.rosaEscuro,
   softBlue: COLORS.azulSuave,
 };
 
-// ─────────────────────────────────────────────
-// TEMA ESCURO
-// ─────────────────────────────────────────────
 
 const darkTheme = {
   dark: true,
 
-  // Fundo geral
+
   background: COLORS.azulVidaPark,
 
-  // Cards
+
   surface: COLORS.azulSuave,
 
-  // Texto principal
+
   text: COLORS.branco,
 
-  // Texto secundário
+
   textSecondary: COLORS.rosaClaro,
 
-  // Texto apagado
+
   textMuted: COLORS.textoMutado,
 
-  // Cor principal
+
   primary: COLORS.rosaClaro,
 
-  // Destaques
+
   accent: COLORS.rosaVidaPark,
 
-  // Bordas
+
   border: "#4A4A70",
 
-  // Sombra
+
   cardShadow: "#000000",
 
-  // Cores extras
+
+warningBackground: "#4A4025",
+warningBorder: "#75652D",
+warningText: "#F4D998",
+
+
   pink: COLORS.rosaVidaPark,
   lightPink: COLORS.rosaClaro,
   darkPink: COLORS.rosaEscuro,
