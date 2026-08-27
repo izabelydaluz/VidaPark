@@ -74,13 +74,7 @@ function TabNavigate() {
         }} />     
     
  
-      <Tab.Screen name="Carrinho" component={Carrinho}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color }) => (
-            <Entypo name="shopping-cart" size={20} color={color} />
-          )
-        }} />
+      
  
       <Tab.Screen name="Perfil" component={Profile}
         options={{
@@ -183,6 +177,12 @@ function AppContent() {
         <Stack.Screen name="MonteSeuCombo" component={MonteSeuCombo} options={{
           headerShown: false
         }} />
+
+        
+ <Stack.Screen name="Carrinho" component={Carrinho} options={{
+          headerShown: false
+        }} />
+
 
         <Stack.Screen name="Checkout" component={Checkout} options={{
           headerShown: false

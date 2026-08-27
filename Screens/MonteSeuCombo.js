@@ -45,93 +45,73 @@ export default function MonteSeuCombo({ route, navigation }) {
 
 
   function alterarQuantidade(produtoId, delta) {
-    setQuantidades((prev) => {
-      const atual = prev[produtoId] || 0;
+  setQuantidades((prev) => {
+    const atual = prev[produtoId] || 0;
 
-      const totalAtual = Object.values(prev).reduce(
-        (soma, qtd) => soma + qtd,
-        0
-      );
-      if (
-        delta > 0 &&
-        limite &&
-        totalAtual >= limite
-      ) {
-        Alert.alert(
-          "Limite atingido",
-          `O Combo ${tamanho} permite até ${limite} salgados.`
-        );
-
-        return prev;
-      }
-
-      const nova = Math.max(0, atual + delta);
-
-      return {
-        ...prev,
-        [produtoId]: nova,
-      };
-    });
-  }
-
-  function definirQuantidade(produtoId, textoDigitado) {
-    if (textoDigitado === "") {
-      setQuantidades((prev) => ({
-        ...prev,
-        [produtoId]: 0,
-      }));
-
-      return;
-    }
-
-    const somenteNumeros = textoDigitado.replace(
-      /[^0-9]/g,
-      ""
+    const totalAtual = Object.values(prev).reduce(
+      (soma, qtd) => soma + qtd,
+      0
     );
 
-    const valor = parseInt(somenteNumeros, 10);
-
-    setQuantidades((prev) => {
-      const totalSemProduto = Object.entries(prev).reduce(
-        (soma, [id, qtd]) => {
-          if (id === produtoId) return soma;
-
-          return soma + qtd;
-        },
-        0
+    if (delta > 0 && limite && totalAtual >= limite) {
+      Alert.alert(
+        "Limite atingido",
+        `O Combo ${tamanho} permite até ${limite} salgados.`
       );
 
-      const quantidadeDisponivel =
-        (limite || 0) - totalSemProduto;
-
-      const quantidadeFinal = Math.min(
-        isNaN(valor) ? 0 : Math.max(0, valor),
-        Math.max(0, quantidadeDisponivel)
-      );
-
-      return {
-        ...prev,
-        [produtoId]: quantidadeFinal,
-      };
-    });
-  }
-
-  function definirQuantidade(produtoId, textoDigitado) {
-  
-    if (textoDigitado === "") {
-      setQuantidades((prev) => ({ ...prev, [produtoId]: 0 }));
-      return;
+      return prev;
     }
 
-    const somenteNumeros = textoDigitado.replace(/[^0-9]/g, "");
-    const valor = parseInt(somenteNumeros, 10);
+    const nova = Math.max(0, atual + delta);
 
+    return {
+      ...prev,
+      [produtoId]: nova,
+    };
+  });
+}
+
+
+ function definirQuantidade(produtoId, textoDigitado) {
+  if (textoDigitado === "") {
     setQuantidades((prev) => ({
       ...prev,
-      [produtoId]: isNaN(valor) ? 0 : Math.max(0, valor),
+      [produtoId]: 0,
     }));
+    return;
   }
 
+  const somenteNumeros = textoDigitado.replace(/[^0-9]/g, "");
+  const valor = parseInt(somenteNumeros, 10);
+
+  setQuantidades((prev) => {
+
+    const totalSemProduto = Object.entries(prev).reduce(
+      (soma, [id, qtd]) => {
+        if (id === produtoId) return soma;
+        return soma + qtd;
+      },
+      0
+    );
+
+
+    const quantidadeDisponivel = Math.max(
+      0,
+      (limite || 0) - totalSemProduto
+    );
+
+
+    const quantidadeFinal = Math.min(
+      isNaN(valor) ? 0 : Math.max(0, valor),
+      quantidadeDisponivel
+    );
+
+    return {
+      ...prev,
+      [produtoId]: quantidadeFinal,
+    };
+  });
+}
   function precoUnitario(item) {
     const valor =
       item.preco ?? item.valor ?? 0;
@@ -177,35 +157,46 @@ export default function MonteSeuCombo({ route, navigation }) {
     ? totalUnidades >= limite
     : false;
 
-  function adicionarAoCarrinho() {
-    if (totalUnidades === 0) {
-      Alert.alert(
-        "Combo vazio",
-        "Escolha pelo menos um salgado para continuar."
-      );
+  
 
-      return;
-    }
 
-    const itensSelecionados = produtos
-      .filter(
-        (item) =>
-          (quantidades[item.id] || 0) > 0
-      )
-      .map((item) => ({
-        id: item.id,
-        nome: item.nome,
-        quantidade: quantidades[item.id],
-        precoUnitario: precoUnitario(item),
-      }));
 
-    navigation.navigate("Carrinho", {
-      combo: itensSelecionados,
-      tamanho: tamanho,
-      limite: limite,
-      total: totalValor,
-    });
+    function adicionarAoCarrinho() {
+
+  if (limite && totalUnidades > limite) {
+    Alert.alert(
+      "Limite excedido",
+      `O Combo ${tamanho} permite no máximo ${limite} salgados.`
+    );
+    return;
   }
+
+  if (totalUnidades === 0) {
+    Alert.alert(
+      "Combo vazio",
+      "Escolha pelo menos um salgado para continuar."
+    );
+    return;
+  }
+
+  const itensSelecionados = produtos
+    .filter(
+      (item) => (quantidades[item.id] || 0) > 0
+    )
+    .map((item) => ({
+      id: item.id,
+      nome: item.nome,
+      quantidade: quantidades[item.id],
+      precoUnitario: precoUnitario(item),
+    }));
+
+  navigation.navigate("Carrinho", {
+    combo: itensSelecionados,
+    tamanho: tamanho,
+    limite: limite,
+    total: totalValor,
+  });
+}
 
 
   return (
@@ -316,7 +307,7 @@ export default function MonteSeuCombo({ route, navigation }) {
                       color={
                         qtd === 0
                           ? theme.textMuted
-                          : theme.text
+                          : theme.surface
                       }
                     />
                   </TouchableOpacity>
@@ -379,8 +370,7 @@ export default function MonteSeuCombo({ route, navigation }) {
           onPress={adicionarAoCarrinho}
           disabled={totalUnidades === 0}
         >
-          <Text
-            style={[ styles.addButtonText,   { color: theme.text, },  ]} >  ADICIONAR AO CARRINHO </Text>
+          <Text style={[ styles.addButtonText,   { color: theme.surface, },  ]} > ADICIONAR AO CARRINHO </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -392,7 +382,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // HEADER
 
   header: {
     paddingTop: 55,

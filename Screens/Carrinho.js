@@ -148,7 +148,7 @@ export default function Carrinho({ navigation, route }) {
 
       <View style={[styles.footer, { backgroundColor: theme.surface,borderTopColor: theme.border, }, ]}>
         <TouchableOpacity style={[styles.finalizarButton, { backgroundColor: theme.accent },  ]}  onPress={finalizarPedido} >
-          <Text style={[ styles.finalizarButtonText, { color: theme.text },]} >FINALIZAR PEDIDO </Text>
+          <Text style={[ styles.finalizarButtonText, { color: theme.surface },]} >FINALIZAR PEDIDO </Text>
         </TouchableOpacity>
       </View>
     </View>
