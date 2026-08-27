@@ -97,8 +97,6 @@ export default function Login({ navigation }) {
     <ImageBackground source={imagemFundo} style={styles.fundo} resizeMode='cover'>
       <View style={styles.overlay}>
 
-
-
         <TextInput
           style={styles.barra}
           placeholder='Nome de usuário'

@@ -169,13 +169,9 @@ export default function AddProdutos({ navigation, route }) {
                 'Produto que será cadastrado:',
                 produto
             );
-
-            const referencia =
-                await addDoc(
-                    collection(
-                        database,
-                        'salgados'
-                    ),
+            
+            const referencia =await addDoc(
+                collection(database,'salgados'),
                     produto
                 );
             console.log(

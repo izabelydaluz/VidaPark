@@ -10,7 +10,7 @@ export default function GerenciarProduto({ navigation }) {
 
   async function carregarProduto() {
     try {
-      const querySnapshot = await getDocs(collection(database, 'produtos'));
+      const querySnapshot = await getDocs(collection(database, 'salgados'));
       const lista = [];
       querySnapshot.forEach((doc) => {
         lista.push({ id: doc.id, ...doc.data() });
@@ -27,7 +27,7 @@ export default function GerenciarProduto({ navigation }) {
 
   async function ExcluirProdutos(id) {
     try {
-      await deleteDoc(doc(database, 'produtos', id));
+      await deleteDoc(doc(database, 'salgados', id));
       setProdutos(prev => prev.filter(p => p.id !== id));
     } catch (error) {
       Alert.alert('error, não foi possível deletar o produto');
