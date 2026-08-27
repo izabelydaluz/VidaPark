@@ -1,11 +1,5 @@
 import React, { useMemo } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { View,Text,FlatList,TouchableOpacity,StyleSheet,} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
 
@@ -45,25 +39,11 @@ export default function Carrinho({ navigation, route }) {
     });
   }
 
-  /* CARRINHO VAZIO */
   if (combo.length === 0) {
     return (
-      <View
-        style={[
-          styles.container,
-          { backgroundColor: theme.background },
-        ]}
-      >
-        <View
-          style={[
-            styles.header,
-            { backgroundColor: theme.primary },
-          ]}
-        >
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.iconButton}
-          >
+      <View style={[styles.container, { backgroundColor: theme.background },  ]} >
+        <View style={[styles.header,{ backgroundColor: theme.primary }, ]} >
+          <TouchableOpacity onPress={() => navigation.goBack()}style={styles.iconButton}>
             <Ionicons
               name="chevron-back"
               size={22}
@@ -71,25 +51,13 @@ export default function Carrinho({ navigation, route }) {
             />
           </TouchableOpacity>
 
-          <Text
-            style={[
-              styles.headerTitle,
-              { color: theme.text },
-            ]}
-          >
-            Meu carrinho
-          </Text>
+          <Text style={[ styles.headerTitle,  { color: theme.surface }, ]} > Meu carrinho  </Text>
 
           <View style={styles.iconButton} />
         </View>
 
         <View style={styles.emptyBox}>
-          <View
-            style={[
-              styles.emptyIconCircle,
-              { backgroundColor: theme.border },
-            ]}
-          >
+          <View style={[  styles.emptyIconCircle, { backgroundColor: theme.border },  ]} >
             <Ionicons
               name="cart-outline"
               size={40}
@@ -97,40 +65,12 @@ export default function Carrinho({ navigation, route }) {
             />
           </View>
 
-          <Text
-            style={[
-              styles.emptyTitle,
-              { color: theme.primary },
-            ]}
-          >
-            Seu carrinho está vazio
-          </Text>
+          <Text   style={[  styles.emptyTitle, { color: theme.primary },  ]}  > Seu carrinho está vazio </Text>
 
-          <Text
-            style={[
-              styles.emptySubtitle,
-              { color: theme.textSecondary },
-            ]}
-          >
-            Adicione itens para continuar seu pedido.
-          </Text>
+          <Text  style={[   styles.emptySubtitle,  { color: theme.textSecondary }, ]} > Adicione itens para continuar seu pedido. </Text>
 
-          <TouchableOpacity
-            style={[
-              styles.emptyButton,
-              { backgroundColor: theme.accent },
-            ]}
-            onPress={() =>
-              navigation.navigate("Catalogo")
-            }
-          >
-            <Text
-              style={[
-                styles.emptyButtonText,
-                { color: theme.text },
-              ]}
-            >
-              VER CATÁLOGO
+          <TouchableOpacity style={[   styles.emptyButton,   { backgroundColor: theme.accent },]} onPress={() => navigation.navigate("Catalogo")}>
+            <Text style={[styles.emptyButtonText,  { color: theme.surface }, ]} >   VER CATÁLOGO
             </Text>
           </TouchableOpacity>
         </View>
@@ -138,24 +78,11 @@ export default function Carrinho({ navigation, route }) {
     );
   }
 
-  /* CARRINHO COM ITENS */
+
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: theme.background },
-      ]}
-    >
-      <View
-        style={[
-          styles.header,
-          { backgroundColor: theme.primary },
-        ]}
-      >
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.iconButton}
-        >
+    <View style={[  styles.container,  { backgroundColor: theme.background }, ]}>
+      <View  style={[  styles.header, { backgroundColor: theme.primary }, ]}>
+        <TouchableOpacity onPress={() => navigation.goBack()}  style={styles.iconButton} >
           <Ionicons
             name="chevron-back"
             size={22}
@@ -163,15 +90,7 @@ export default function Carrinho({ navigation, route }) {
           />
         </TouchableOpacity>
 
-        <Text
-          style={[
-            styles.headerTitle,
-            { color: theme.text },
-          ]}
-        >
-          Meu carrinho
-        </Text>
-
+        <Text style={[ styles.headerTitle, { color: theme.text },  ]} >   Meu carrinho </Text>
         <View style={styles.iconButton} />
       </View>
 
@@ -181,97 +100,29 @@ export default function Carrinho({ navigation, route }) {
         contentContainerStyle={styles.lista}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
-          <View
-            style={[
-              styles.resumoCard,
-              {
-                backgroundColor: theme.surface,
-                shadowColor: theme.cardShadow,
-              },
-            ]}
-          >
+          <View style={[ styles.resumoCard, { backgroundColor: theme.surface,  shadowColor: theme.cardShadow, }, ]} >
             <View style={styles.resumoTopo}>
               <View>
-                <Text
-                  style={[
-                    styles.resumoTitulo,
-                    { color: theme.primary },
-                  ]}
-                >
-                  Monte seu combo
-                </Text>
+                <Text style={[ styles.resumoTitulo,{ color: theme.primary },  ]} > Monte seu combo</Text>
 
-                <Text
-                  style={[
-                    styles.resumoSubtitulo,
-                    { color: theme.textSecondary },
-                  ]}
-                >
-                  {totalUnidades} unidades{"  "}
-
-                  <Text
-                    style={[
-                      styles.resumoValorDestaque,
-                      { color: theme.darkPink },
-                    ]}
-                  >
-                    {formatarPreco(totalCombo)}
-                  </Text>
+                <Text style={[ styles.resumoSubtitulo, { color: theme.textSecondary },  ]} > {totalUnidades} unidades{"  "}
+                   <Text style={[styles.resumoValorDestaque,  { color: theme.darkPink },  ]} >{formatarPreco(totalCombo)} </Text>
                 </Text>
               </View>
 
-              <TouchableOpacity
-                style={[
-                  styles.editarButton,
-                  { borderColor: theme.accent },
-                ]}
-                onPress={() =>
-                  navigation.navigate("MonteSeuCombo")
-                }
-              >
-                <Text
-                  style={[
-                    styles.editarButtonText,
-                    { color: theme.accent },
-                  ]}
-                >
-                  Editar combo
-                </Text>
+              <TouchableOpacity style={[ styles.editarButton, { borderColor: theme.accent }, ]} onPress={() => navigation.navigate("Catalogo") }  >
+                <Text style={[ styles.editarButtonText,  { color: theme.accent },  ]} > Editar combo </Text>
               </TouchableOpacity>
             </View>
           </View>
         }
         renderItem={({ item }) => (
-          <View
-            style={[
-              styles.itemLinha,
-              { borderBottomColor: theme.border },
-            ]}
-          >
-            <Text
-              style={[
-                styles.itemNome,
-                { color: theme.primary },
-              ]}
-            >
-              {item.nome}{" "}
-
-              <Text
-                style={[
-                  styles.itemQtd,
-                  { color: theme.textMuted },
-                ]}
-              >
-                {item.quantidade} un.
-              </Text>
+          <View style={[  styles.itemLinha,{ borderBottomColor: theme.border }, ]} >
+            <Text style={[  styles.itemNome,{ color: theme.primary }, ]} > {item.nome}{" "}
+              <Text style={[styles.itemQtd, { color: theme.textMuted },]} > {item.quantidade} un.  </Text>
             </Text>
 
-            <Text
-              style={[
-                styles.itemPreco,
-                { color: theme.textSecondary },
-              ]}
-            >
+            <Text  style={[ styles.itemPreco,  { color: theme.textSecondary }, ]} >
               {formatarPreco(
                 item.quantidade * item.precoUnitario
               )}
@@ -281,81 +132,23 @@ export default function Carrinho({ navigation, route }) {
         ListFooterComponent={
           <View style={styles.resumoFinal}>
             <View style={styles.linhaValor}>
-              <Text
-                style={[
-                  styles.linhaLabel,
-                  { color: theme.textSecondary },
-                ]}
-              >
-                Taxa de entrega
-              </Text>
-
-              <Text
-                style={[
-                  styles.linhaValorTexto,
-                  { color: theme.textSecondary },
-                ]}
-              >
-                {formatarPreco(TAXA_ENTREGA)}
-              </Text>
+              <Text style={[ styles.linhaLabel, { color: theme.textSecondary },  ]} >  Taxa de entrega</Text>
+              <Text style={[ styles.linhaValorTexto,  { color: theme.textSecondary },]}> {formatarPreco(TAXA_ENTREGA)}</Text>
             </View>
 
-            <View
-              style={[
-                styles.linhaValor,
-                styles.linhaTotal,
-                {
-                  borderTopColor: theme.border,
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.totalLabel,
-                  { color: theme.primary },
-                ]}
-              >
-                Total
-              </Text>
+            <View style={[styles.linhaValor,  styles.linhaTotal,  { borderTopColor: theme.border,  }, ]}>
+              <Text style={[styles.totalLabel,{ color: theme.primary },]} >Total </Text>
 
-              <Text
-                style={[
-                  styles.totalValorTexto,
-                  { color: theme.primary },
-                ]}
-              >
-                {formatarPreco(totalGeral)}
-              </Text>
+              <Text style={[   styles.totalValorTexto, { color: theme.primary }, ]} >  {formatarPreco(totalGeral)} </Text>
             </View>
           </View>
         }
       />
 
-      {/* BOTÃO FINALIZAR */}
-      <View
-        style={[
-          styles.footer,
-          {
-            backgroundColor: theme.surface,
-            borderTopColor: theme.border,
-          },
-        ]}
-      >
-        <TouchableOpacity
-          style={[
-            styles.finalizarButton,
-            { backgroundColor: theme.accent },
-          ]}
-          onPress={finalizarPedido}
-        >
-          <Text
-            style={[
-              styles.finalizarButtonText,
-              { color: theme.text },
-            ]}
-          >
-            FINALIZAR PEDIDO
-          </Text>
+
+      <View style={[styles.footer, { backgroundColor: theme.surface,borderTopColor: theme.border, }, ]}>
+        <TouchableOpacity style={[styles.finalizarButton, { backgroundColor: theme.accent },  ]}  onPress={finalizarPedido} >
+          <Text style={[ styles.finalizarButtonText, { color: theme.text },]} >FINALIZAR PEDIDO </Text>
         </TouchableOpacity>
       </View>
     </View>
