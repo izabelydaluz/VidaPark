@@ -32,6 +32,7 @@ import MonteSeuCombo from "./Screens/MonteSeuCombo";
 import Carrinho from "./Screens/Carrinho";
 import Checkout from "./Screens/Checkout";
 import MeusPedidos from "./Screens/MeusPedidos";
+import TamanhoCombo from "./Screens/TamanhoCombo";
  
 function TabNavigate() {
   const Tab = createBottomTabNavigator();
@@ -53,7 +54,6 @@ function TabNavigate() {
       }}
     >
 
-      
 
 
       <Tab.Screen name="Home" component={Home}
@@ -71,19 +71,8 @@ function TabNavigate() {
             <Entypo name="shopping-bag" size={20} color={color} />
             
           )
-        }} />
-
-        <Tab.Screen name="Combo" component={MonteSeuCombo}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color }) => (
-            <Entypo name="shop" size={20} color={color} />
-          )
-        }} />
-        
-       
- 
-      
+        }} />     
+    
  
       <Tab.Screen name="Carrinho" component={Carrinho}
         options={{
@@ -135,10 +124,7 @@ function AppContent() {
         }}
       >
 
-        
-
-
-
+       
 
         <Stack.Screen name="Login" component={Login} options={{
           headerShown: false
@@ -182,10 +168,7 @@ function AppContent() {
         }} />
 
 
-    
-
-
-          <Stack.Screen name="Home" component={TabNavigate} options={{
+         <Stack.Screen name="Home" component={TabNavigate} options={{
           headerShown: false
         }} />
 
@@ -193,13 +176,14 @@ function AppContent() {
           headerShown: false
         }} />
 
-        <Stack.Screen name="Combo" component={TabNavigate} options={{
+        <Stack.Screen name="TamanhoCombo" component={TamanhoCombo} options={{
+          headerShown: false
+        }} />
+        
+        <Stack.Screen name="MonteSeuCombo" component={MonteSeuCombo} options={{
           headerShown: false
         }} />
 
-        
-
-        
         <Stack.Screen name="Checkout" component={Checkout} options={{
           headerShown: false
         }} />
@@ -207,7 +191,6 @@ function AppContent() {
         <Stack.Screen name="MeusPedidos" component={MeusPedidos} options={{
           headerShown: false
         }} />
-
 
         <Stack.Screen name="EditProfile" component={EditProfile} options={{
           headerShown: false
