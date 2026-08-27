@@ -1,21 +1,9 @@
 import React, { useState, useMemo, useEffect } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import {View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator, Alert, TextInput} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { collection, getDocs } from "firebase/firestore";
 import { database } from "../firebaseConfig";
 
-// ─────────────────────────────────────────────
-// PALETA "VIDA PARK"
-// ─────────────────────────────────────────────
 const COLORS = {
   azulVidaPark: "#202040",
   rosaVidaPark: "#E84890",
@@ -36,7 +24,7 @@ const MINIMO_UNIDADES = 50;
 export default function MonteSeuCombo({ navigation }) {
   const [produtos, setProdutos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [quantidades, setQuantidades] = useState({}); // { produtoId: quantidade }
+  const [quantidades, setQuantidades] = useState({}); 
 
   async function carregarSalgados() {
     try {
@@ -64,6 +52,22 @@ export default function MonteSeuCombo({ navigation }) {
       const nova = Math.max(0, atual + delta);
       return { ...prev, [produtoId]: nova };
     });
+  }
+
+  function definirQuantidade(produtoId, textoDigitado) {
+  
+    if (textoDigitado === "") {
+      setQuantidades((prev) => ({ ...prev, [produtoId]: 0 }));
+      return;
+    }
+
+    const somenteNumeros = textoDigitado.replace(/[^0-9]/g, "");
+    const valor = parseInt(somenteNumeros, 10);
+
+    setQuantidades((prev) => ({
+      ...prev,
+      [produtoId]: isNaN(valor) ? 0 : Math.max(0, valor),
+    }));
   }
 
   function precoUnitario(item) {
@@ -108,13 +112,11 @@ export default function MonteSeuCombo({ navigation }) {
         precoUnitario: precoUnitario(item),
       }));
 
-    // Ajuste aqui para sua lógica real de carrinho (Context, AsyncStorage, Firestore...)
     navigation.navigate("Carrinho", { combo: itensSelecionados, total: totalValor });
   }
 
   return (
     <View style={styles.container}>
-      {/* ───── HEADER ───── */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
           <Ionicons name="chevron-back" size={22} color={COLORS.branco} />
@@ -135,13 +137,11 @@ export default function MonteSeuCombo({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* ───── AVISO DE MÍNIMO ───── */}
       <View style={styles.avisoBox}>
         <Text style={styles.avisoTitulo}>Mínimo de {MINIMO_UNIDADES} unidades</Text>
         <Text style={styles.avisoSubtitulo}>Escolha entre os sabores abaixo</Text>
       </View>
 
-      {/* ───── PROGRESSO ───── */}
       <View style={styles.progressoWrapper}>
         <Text style={styles.progressoLabel}>
           Você selecionou{" "}
@@ -159,7 +159,6 @@ export default function MonteSeuCombo({ navigation }) {
         </View>
       </View>
 
-      {/* ───── LISTA DE SABORES ───── */}
       {loading ? (
         <View style={styles.centerBox}>
           <ActivityIndicator size="large" color={COLORS.rosaVidaPark} />
@@ -170,6 +169,7 @@ export default function MonteSeuCombo({ navigation }) {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.lista}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
           renderItem={({ item }) => {
             const qtd = quantidades[item.id] || 0;
             return (
@@ -196,7 +196,15 @@ export default function MonteSeuCombo({ navigation }) {
                     <Ionicons name="remove" size={16} color={qtd === 0 ? COLORS.textoMutado : COLORS.branco} />
                   </TouchableOpacity>
 
-                  <Text style={styles.stepperValor}>{qtd}</Text>
+                  <TextInput
+                    style={styles.stepperInput}
+                    value={String(qtd)}
+                    onChangeText={(texto) => definirQuantidade(item.id, texto)}
+                    keyboardType="number-pad"
+                    textAlign="center"
+                    selectTextOnFocus
+                    maxLength={4}
+                  />
 
                   <TouchableOpacity style={styles.stepperButton} onPress={() => alterarQuantidade(item.id, 1)}>
                     <Ionicons name="add" size={16} color={COLORS.branco} />
@@ -208,7 +216,6 @@ export default function MonteSeuCombo({ navigation }) {
         />
       )}
 
-      {/* ───── FOOTER FIXO ───── */}
       <View style={styles.footer}>
         <View style={styles.footerResumo}>
           <Text style={styles.footerUnidades}>{totalUnidades} unidades</Text>
@@ -232,7 +239,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.branco,
   },
 
-  // Header
   header: {
     backgroundColor: COLORS.azulVidaPark,
     paddingTop: 55,
@@ -255,7 +261,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  // Aviso
   avisoBox: {
     backgroundColor: COLORS.amareloFundo,
     borderWidth: 1,
@@ -276,7 +281,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // Progresso
   progressoWrapper: {
     marginHorizontal: 16,
     marginTop: 14,
@@ -297,7 +301,6 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
 
-  // Lista
   lista: {
     padding: 16,
     paddingBottom: 130,
@@ -341,7 +344,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  // Stepper
   stepper: {
     flexDirection: "row",
     alignItems: "center",
@@ -358,22 +360,25 @@ const styles = StyleSheet.create({
   stepperButtonDisabled: {
     backgroundColor: COLORS.bordaClara,
   },
-  stepperValor: {
+  stepperInput: {
     fontSize: 14,
     fontWeight: "700",
     color: COLORS.azulVidaPark,
-    minWidth: 18,
-    textAlign: "center",
+    minWidth: 34,
+    paddingVertical: 2,
+    paddingHorizontal: 4,
+    borderWidth: 1,
+    borderColor: COLORS.bordaClara,
+    borderRadius: 6,
+    backgroundColor: "#FFFFFF",
   },
 
-  // Estados
   centerBox: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
 
-  // Footer fixo
   footer: {
     position: "absolute",
     bottom: 0,

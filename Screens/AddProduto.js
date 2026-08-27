@@ -1,5 +1,4 @@
 import {View,Text,TextInput,StyleSheet,Image,Alert} from 'react-native';
-
 import { Button } from 'react-native-paper';
 import { database } from '../firebaseConfig';
 import { useState } from 'react';
@@ -18,7 +17,6 @@ export default function AddProdutos({ navigation, route }) {
     const escolherImagem = async () => {
 
         try {
-
             const permissao =
                 await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -39,7 +37,7 @@ export default function AddProdutos({ navigation, route }) {
                     quality: 0.5,
                 });
 
-            // Verifica se o usuário selecionou uma image -gui
+            // Verifica se o usuário selecionou uma imagem
             if (!resultado.canceled && resultado.assets?.length > 0) {
 
                 const uri = resultado.assets[0].uri;
@@ -104,6 +102,7 @@ export default function AddProdutos({ navigation, route }) {
                     'Erro',
                     'Digite o nome do produto.'
                 );
+
                 return;
             }
 
@@ -116,6 +115,7 @@ export default function AddProdutos({ navigation, route }) {
 
                 return;
             }
+
             //Permite que o usuário digite o valor com vírgula ou ponto decimal, mas converte para ponto decimal para salvar no banco de dados. -gui
             const valorNumerico =
                 parseFloat(
@@ -168,12 +168,11 @@ export default function AddProdutos({ navigation, route }) {
                 criadoEm: new Date().toISOString(),
             };
 
-
             console.log(
                 'Produto que será cadastrado:',
                 produto
             );
-            
+
             const referencia =
                 await addDoc(
                     collection(
@@ -262,7 +261,7 @@ export default function AddProdutos({ navigation, route }) {
                 value={nome}
                 onChangeText={setNome}
                 placeholderTextColor="#e58aaa"
-            />    
+            />
 
             <TextInput
                 style={styles.barra}
@@ -318,7 +317,8 @@ export default function AddProdutos({ navigation, route }) {
                     textColor="#8b3151"
                     mode="contained"
                     onPress={() => navigation.goBack()}
-                >   Voltar
+                >
+                    Voltar
                 </Button>
             </View>
         </View>
@@ -333,8 +333,11 @@ const styles = StyleSheet.create({
         color: '#E84890',
         textAlign: 'center',
         marginBottom: 30,
-        textShadowColor:'rgba(0, 0, 0, 0.4)',
-        textShadowOffset: { width: 3, height: 3},
+        textShadowColor: 'rgba(0, 0, 0, 0.4)',
+        textShadowOffset: {
+            width: 3,
+            height: 3,
+        },
         textShadowRadius: 6,
         letterSpacing: 2,
     },
