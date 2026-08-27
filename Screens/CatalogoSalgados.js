@@ -83,7 +83,7 @@ export default function CatalogoSalgados({ navigation }) {
           <Ionicons
             name="chevron-back"
             size={22}
-            color={theme.surface}
+            color={theme.text}
           />
         </TouchableOpacity>
 
@@ -93,7 +93,7 @@ export default function CatalogoSalgados({ navigation }) {
             <Ionicons
               name="search-outline"
               size={20}
-              color={theme.surface}
+              color={theme.text}
             />
           </TouchableOpacity>
 
@@ -101,7 +101,7 @@ export default function CatalogoSalgados({ navigation }) {
             <Ionicons
               name="cart-outline"
               size={20}
-              color={theme.surface}
+              color={theme.text}
             />{itensCarrinho > 0 && (
 
               <View style={[ styles.cartBadge, {backgroundColor: theme.accent, }, ]} >
