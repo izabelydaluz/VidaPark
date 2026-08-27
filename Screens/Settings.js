@@ -94,13 +94,7 @@ export default function Settings({ navigation }) {
     {
       section: "Dados",
       items: [
-        {
-          title: "Limpar favoritos",
-          subtitle: "Remover todos os produtos salvos",
-          icon: "heart-outline",
-          type: "action",
-          onPress: handleClearFavorites,
-        },
+        
         {
           title: "Limpar carrinho",
           subtitle: "Esvaziar o carrinho de compras",
@@ -115,11 +109,11 @@ export default function Settings({ navigation }) {
       items: [
         {
           title: "Instagram",
-          subtitle: "@bellaplusmulherao",
+          subtitle: "@VidaPark",
           icon: "logo-instagram",
           type: "action",
           onPress: () => {
-            Linking.openURL("https://www.instagram.com/bellaplusmulherao/");
+            Linking.openURL("https://www.instagram.com/vidapark/");
           },
         },
         {

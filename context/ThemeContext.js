@@ -5,9 +5,6 @@ const ThemeContext = createContext();
 
 const SETTINGS_FILE = `${FileSystem.documentDirectory}bellaplus_settings.json`;
 
-// ─────────────────────────────────────────────
-// PALETA "VIDA PARK"
-// ─────────────────────────────────────────────
 
 const COLORS = {
   azulVidaPark: "#202040",
@@ -35,7 +32,7 @@ const lightTheme = {
   surface: "#FFFFFF",
 
   // Texto principal
-  text: COLORS.azulVidaPark,
+  text: COLORS.rosaVidaPark,
 
   // Textos secundários
   textSecondary: COLORS.textoSecundario,

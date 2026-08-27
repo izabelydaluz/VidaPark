@@ -25,9 +25,10 @@ export default function AddProdutos({ navigation, route }) {
                     'Permissão necessária',
                     'É necessário permitir o acesso à galeria para selecionar uma imagem.'
                 );
+
                 return;
             }
-
+            // Abre a galeria
             const resultado =
                 await ImagePicker.launchImageLibraryAsync({
                     mediaTypes: ['images'],
@@ -36,7 +37,9 @@ export default function AddProdutos({ navigation, route }) {
                     quality: 0.5,
                 });
 
+            // Verifica se o usuário selecionou uma imagem
             if (!resultado.canceled && resultado.assets?.length > 0) {
+
                 const uri = resultado.assets[0].uri;
                 console.log('Imagem selecionada:', uri);
                 setImagem(uri);
@@ -62,15 +65,14 @@ export default function AddProdutos({ navigation, route }) {
             if (!response.ok) {
                 throw new Error('Não foi possível carregar a imagem.');
             }
+
             const blob = await response.blob();
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onloadend = () => {
                     resolve(reader.result);
                 };
-
                 reader.onerror = () => {
-
                     reject(
                         new Error('Erro ao converter a imagem.')
                     );
@@ -92,7 +94,6 @@ export default function AddProdutos({ navigation, route }) {
     const CadastrarProdutos = async () => {
 
         try {
-
             console.log('Iniciando cadastro...');
 
             if (!nome.trim()) {
@@ -115,11 +116,11 @@ export default function AddProdutos({ navigation, route }) {
                 return;
             }
 
+            //Permite que o usuário digite o valor com vírgula ou ponto decimal, mas converte para ponto decimal para salvar no banco de dados. -gui
             const valorNumerico =
                 parseFloat(
                     valor.replace(',', '.')
                 );
-
 
             if (isNaN(valorNumerico)) {
 
@@ -127,6 +128,7 @@ export default function AddProdutos({ navigation, route }) {
                     'Erro',
                     'Digite um valor válido.\n\nExemplo: 25,90'
                 );
+
                 return;
             }
 
@@ -136,6 +138,7 @@ export default function AddProdutos({ navigation, route }) {
                     'Erro',
                     'O valor não pode ser negativo.'
                 );
+
                 return;
             }
 
@@ -169,11 +172,16 @@ export default function AddProdutos({ navigation, route }) {
                 'Produto que será cadastrado:',
                 produto
             );
-            
-            const referencia =await addDoc(
-                collection(database,'salgados'),
+
+            const referencia =
+                await addDoc(
+                    collection(
+                        database,
+                        'salgados'
+                    ),
                     produto
                 );
+
             console.log(
                 'Produto cadastrado com ID:',
                 referencia.id
@@ -192,13 +200,9 @@ export default function AddProdutos({ navigation, route }) {
                         text: 'OK',
                         onPress: () => {
                             navigation.goBack();
-
                             if (aoSalvar) {
-
                                 setTimeout(() => {
-
                                     aoSalvar();
-
                                 }, 100);
                             }
                         },
@@ -211,15 +215,18 @@ export default function AddProdutos({ navigation, route }) {
             console.log(
                 '================================'
             );
+
             console.log(
                 'ERRO AO CADASTRAR PRODUTO:'
             );
+
             console.log(error);
 
             console.log(
                 'Mensagem:',
                 error.message
             );
+
             console.log(
                 '================================'
             );
@@ -300,7 +307,8 @@ export default function AddProdutos({ navigation, route }) {
                     textColor="#8b3151"
                     mode="contained"
                     onPress={CadastrarProdutos}
-                > Cadastrar
+                >
+                    Cadastrar
                 </Button>
 
                 <Button
@@ -309,7 +317,8 @@ export default function AddProdutos({ navigation, route }) {
                     textColor="#8b3151"
                     mode="contained"
                     onPress={() => navigation.goBack()}
-                > Voltar
+                >
+                    Voltar
                 </Button>
             </View>
         </View>
