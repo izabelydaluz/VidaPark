@@ -116,6 +116,22 @@ export default function MonteSeuCombo({ route, navigation }) {
     });
   }
 
+  function definirQuantidade(produtoId, textoDigitado) {
+  
+    if (textoDigitado === "") {
+      setQuantidades((prev) => ({ ...prev, [produtoId]: 0 }));
+      return;
+    }
+
+    const somenteNumeros = textoDigitado.replace(/[^0-9]/g, "");
+    const valor = parseInt(somenteNumeros, 10);
+
+    setQuantidades((prev) => ({
+      ...prev,
+      [produtoId]: isNaN(valor) ? 0 : Math.max(0, valor),
+    }));
+  }
+
   function precoUnitario(item) {
     const valor =
       item.preco ?? item.valor ?? 0;
@@ -251,6 +267,7 @@ export default function MonteSeuCombo({ route, navigation }) {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.lista}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
           renderItem={({ item }) => {
             const qtd =
               quantidades[item.id] || 0;
