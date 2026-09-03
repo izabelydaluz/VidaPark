@@ -1,13 +1,13 @@
 import { TextInput, Text, StyleSheet, Alert, ImageBackground, View, TouchableOpacity, Linking, Image, useWindowDimensions } from "react-native";
 import { Button } from "react-native-paper";
 import { useState } from "react";
-import { auth, database } from "../firebaseConfig";
+import { auth, database } from "../../../firebaseConfig";
 import {signInWithEmailAndPassword,signOut} from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import Entypo from '@expo/vector-icons/Entypo';
 
-const imagemDesktop = require("../Images/logo.png");
-const imagemMobile = require("../Images/logo.png");
+const imagemDesktop = require("../../../Images/logo.png");
+const imagemMobile = require("../../../Images/logo.png");
 
 const abrirInstagram = async () => {
   const url = 'https://www.instagram.com/vidapark/';

@@ -1,16 +1,9 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
+import {View,Text,StyleSheet,FlatList,TouchableOpacity,ActivityIndicator} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { database, auth } from "../firebaseConfig";
-import { useTheme } from "../context/ThemeContext";
+import { database, auth } from "../../../firebaseConfig";
+import { useTheme } from "../../../context/ThemeContext";
 
 export default function Purchases({ navigation }) {
   const [purchases, setPurchases] = useState([]);

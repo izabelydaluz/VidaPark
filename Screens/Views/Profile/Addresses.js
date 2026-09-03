@@ -1,18 +1,8 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Alert,
-  TextInput,
-  Modal,
-  ActivityIndicator,
-} from "react-native";
+import { View,Text,StyleSheet,FlatList,TouchableOpacity,Alert,TextInput,Modal,ActivityIndicator} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as FileSystem from "expo-file-system/legacy";
-import { useTheme } from "../context/ThemeContext";
+import { useTheme } from "../../../context/ThemeContext";
 
 const ADDRESSES_FILE = `${FileSystem.documentDirectory}bellaplus_addresses.json`;
 

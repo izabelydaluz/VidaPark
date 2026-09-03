@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import {View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator, Alert, TextInput} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { collection, getDocs } from "firebase/firestore";
-import { database } from "../firebaseConfig";
+import { database } from "../../../firebaseConfig";
 
 const COLORS = {
   azulVidaPark: "#202040",

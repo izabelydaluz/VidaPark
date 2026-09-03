@@ -1,21 +1,10 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  TextInput,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { View,Text,FlatList,TouchableOpacity,Image,TextInput,StyleSheet,ActivityIndicator} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { collection, getDocs } from "firebase/firestore";
-import { database } from "../firebaseConfig";
+import { database } from "../../../firebaseConfig";
 
-// ─────────────────────────────────────────────
-// PALETA "VIDA PARK"
-// ─────────────────────────────────────────────
+//Palheta de cores!!!
 const COLORS = {
   azulVidaPark: "#202040",
   rosaVidaPark: "#E84890",
@@ -80,7 +69,7 @@ export default function CatalogoSalgados({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* ───── HEADER ───── */}
+
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
           <Ionicons name="chevron-back" size={22} color={COLORS.branco} />
@@ -106,7 +95,7 @@ export default function CatalogoSalgados({ navigation }) {
         </View>
       </View>
 
-      {/* ───── BUSCA (aparece ao tocar na lupa) ───── */}
+    
       {busca !== "" && (
         <View style={styles.searchBox}>
           <Ionicons name="search-outline" size={16} color={COLORS.textoMutado} />
@@ -121,7 +110,7 @@ export default function CatalogoSalgados({ navigation }) {
         </View>
       )}
 
-      {/* ───── FILTROS DE CATEGORIA ───── */}
+
       <View style={styles.categoriasWrapper}>
         <FlatList
           data={CATEGORIAS}
@@ -145,7 +134,7 @@ export default function CatalogoSalgados({ navigation }) {
         />
       </View>
 
-      {/* ───── LISTA DE PRODUTOS ───── */}
+      
       {loading ? (
         <View style={styles.centerBox}>
           <ActivityIndicator size="large" color={COLORS.rosaVidaPark} />
@@ -182,7 +171,6 @@ export default function CatalogoSalgados({ navigation }) {
         />
       )}
 
-      {/* ───── BOTÃO FIXO: MONTE SEU COMBO ───── */}
       <View style={styles.footer}>
         <TouchableOpacity
           style={styles.comboButton}
@@ -245,7 +233,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  // Busca
+
   searchBox: {
     flexDirection: "row",
     alignItems: "center",
@@ -265,7 +253,7 @@ const styles = StyleSheet.create({
     color: COLORS.azulVidaPark,
   },
 
-  // Categorias
+
   categoriasWrapper: {
     marginTop: 14,
   },
@@ -295,7 +283,6 @@ const styles = StyleSheet.create({
     color: COLORS.branco,
   },
 
-  // Lista
   lista: {
     padding: 16,
     paddingBottom: 100,

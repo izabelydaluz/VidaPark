@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { View, StyleSheet, Text, Alert, TouchableOpacity, ActivityIndicator, Modal, TextInput, FlatList } from "react-native";
 import { WebView } from "react-native-webview";
-import { useProducts } from "../context/ProductContext";
-import { auth } from "../firebaseConfig";
+import { useProducts } from "../../../context/ProductContext";
+import { auth } from "../../../firebaseConfig";
 import * as FileSystem from "expo-file-system/legacy";
 
 const FUNCTIONS_URL = "https://us-central1-bella-plus-mulherao.cloudfunctions.net";

@@ -6,31 +6,29 @@ import { Platform, AppState } from "react-native";
 import * as NavigationBar from "expo-navigation-bar";
 import Entypo from '@expo/vector-icons/Entypo';
  
-import Login from './Screens/Login'
+import Login from './Screens/Views/Auth/Login'
 
-
-
-import ADM from "./Screens/adm";
-import GerenciarProduto from "./Screens/GerenciarProduto";
-import AddProdutos from "./Screens/AddProduto";
-import Pagamento from "./Screens/Pagamento";
-import Cadastrar from "./Screens/Cadastrar";
-import EditProduct from "./Screens/EditProduct";
+import ADM from "./Screens/Views/Admin/adm";
+import GerenciarProduto from "./Screens/Views/Admin/GerenciarProduto";
+import AddProdutos from "./Screens/Views/Admin/AddProduto";
+import Pagamento from "./Screens/Views/Checkout/Pagamento";
+import Cadastrar from "./Screens/Views/Auth/Cadastrar";
+import EditProduct from "./Screens/Views/Admin/EditProduct";
 import { ProductProvider } from "./context/ProductContext";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
-import Profile from './Screens/Profile';
-import EditProfile from './Screens/EditProfile';
-import ChangePassword from './Screens/ChangePassword';
-import Purchases from './Screens/Purchases';
-import Addresses from './Screens/Addresses';
-import Settings from './Screens/Settings';
-import GerenciarCliente from './Screens/GerenciarCliente';
-import GerenciarVendas from "./Screens/GerenciarVendas";
+import Profile from './Screens/Views/Profile/Profile';
+import EditProfile from './Screens/Views/Auth/EditProfile';
+import ChangePassword from './Screens/Views/Auth/ChangePassword';
+import Purchases from './Screens/Views/Profile/Purchases';
+import Addresses from './Screens/Views/Profile/Addresses';
+import Settings from './Screens/Views/Profile/Settings';
+import GerenciarCliente from './Screens/Views/Admin/GerenciarCliente';
+import GerenciarVendas from "./Screens/Views/Admin/GerenciarVendas";
 import Home from "./Screens/Home";
-import CatalogoSalgados from "./Screens/CatalogoSalgados";
-import MonteSeuCombo from "./Screens/MonteSeuCombo";
-import Carrinho from "./Screens/Carrinho";
-import Checkout from "./Screens/Checkout";
+import CatalogoSalgados from "./Screens/Views/Main/CatalogoSalgados";
+import MonteSeuCombo from "./Screens/Views/Checkout/MonteSeuCombo";
+import Carrinho from "./Screens/Views/Checkout/Carrinho";
+import Checkout from "./Screens/Views/Checkout/Checkout";
 import MeusPedidos from "./Screens/MeusPedidos";
  
 function TabNavigate() {
@@ -52,9 +50,6 @@ function TabNavigate() {
         tabBarInactiveTintColor: theme.textMuted,
       }}
     >
-
-      
-
 
       <Tab.Screen name="Home" component={Home}
         options={{
