@@ -1,18 +1,9 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Switch,
-  Alert,
-  Linking,
-} from "react-native";
+import {View,Text,StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, Linking} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { auth, signOut } from "../firebaseConfig";
-import { useProducts } from "../context/ProductContext";
-import { useTheme } from "../context/ThemeContext";
+import { auth, signOut } from "../../../firebaseConfig";
+import { useProducts } from "../../../context/ProductContext";
+import { useTheme } from "../../../context/ThemeContext";
 
 export default function Settings({ navigation }) {
   const { clearCart, clearFavorites } = useProducts();

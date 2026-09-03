@@ -1,22 +1,8 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  ScrollView,
-  ActivityIndicator,
-} from "react-native";
+import {View,Text,StyleSheet,TextInput,TouchableOpacity,Alert,ScrollView,ActivityIndicator} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  auth,
-  updatePassword,
-  reauthenticateWithCredential,
-  EmailAuthProvider,
-} from "../firebaseConfig";
-import { useTheme } from "../context/ThemeContext";
+import {auth,updatePassword,reauthenticateWithCredential,EmailAuthProvider} from "../../../firebaseConfig";
+import { useTheme } from "../../../context/ThemeContext";
 
 export default function ChangePassword({ navigation }) {
   const [currentPassword, setCurrentPassword] = useState("");

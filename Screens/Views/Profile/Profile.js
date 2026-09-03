@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { auth, signOut, onAuthStateChanged } from "../firebaseConfig";
-import { useTheme } from "../context/ThemeContext";
+import { auth, signOut, onAuthStateChanged } from "../../../firebaseConfig";
+import { useTheme } from "../../../context/ThemeContext";
 import * as FileSystem from "expo-file-system/legacy";
 
 const PROFILE_FILE = `${FileSystem.documentDirectory}bellaplus_profile.json`;

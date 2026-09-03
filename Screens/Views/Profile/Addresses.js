@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-
 import {
   View,
   Text,
@@ -11,21 +10,8 @@ import {
   Modal,
   ActivityIndicator,
 } from "react-native";
-
 import { Ionicons } from "@expo/vector-icons";
-
-import { auth, db } from "../firebaseConfig";
-
-import {
-  collection,
-  doc,
-  setDoc,
-  addDoc,
-  deleteDoc,
-  writeBatch,
-  onSnapshot,
-} from "firebase/firestore";
-
+import * as FileSystem from "expo-file-system/legacy";
 import { useTheme } from "../context/ThemeContext";
 
 // ======================================================

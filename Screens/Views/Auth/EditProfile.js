@@ -1,18 +1,8 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  ScrollView,
-  ActivityIndicator,
-  Image,
-} from "react-native";
+import {View,Text,StyleSheet,TextInput,TouchableOpacity,Alert,ScrollView,ActivityIndicator,Image} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { auth, onAuthStateChanged } from "../firebaseConfig";
-import { useTheme } from "../context/ThemeContext";
+import { auth, onAuthStateChanged } from "../../../firebaseConfig";
+import { useTheme } from "../../../context/ThemeContext";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system/legacy";
 

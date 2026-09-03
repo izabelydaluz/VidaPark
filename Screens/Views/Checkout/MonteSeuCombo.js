@@ -3,7 +3,23 @@ import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndi
 import { Ionicons } from "@expo/vector-icons";
 import { collection, getDocs } from "firebase/firestore";
 import { database } from "../firebaseConfig";
-import { useTheme } from "../context/ThemeContext";
+
+const COLORS = {
+  azulVidaPark: "#202040",
+  rosaVidaPark: "#E84890",
+  branco: "#F8F8F8",
+  rosaClaro: "#F7A8C8",
+  azulSuave: "#34345C",
+  rosaEscuro: "#C93678",
+  textoSecundario: "#6B6B85",
+  textoMutado: "#B3B3C6",
+  bordaClara: "#EDEDF2",
+  amareloFundo: "#FFF6E0",
+  amareloBorda: "#F4D998",
+  amareloTexto: "#9A7B1E",
+};
+
+const MINIMO_UNIDADES = 50;
 
 export default function MonteSeuCombo({ route, navigation }) {
   const { theme } = useTheme();

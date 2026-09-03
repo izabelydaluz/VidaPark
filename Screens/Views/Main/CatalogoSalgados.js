@@ -1,9 +1,32 @@
 import React, { useState, useEffect } from "react";
-import {View,Text,FlatList,TouchableOpacity,Image,TextInput,StyleSheet,ActivityIndicator,} from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  Image,
+  TextInput,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { collection, getDocs } from "firebase/firestore";
 import { database } from "../firebaseConfig";
-import { useTheme } from "../context/ThemeContext";
+
+// ─────────────────────────────────────────────
+// PALETA "VIDA PARK"
+// ─────────────────────────────────────────────
+const COLORS = {
+  azulVidaPark: "#202040",
+  rosaVidaPark: "#E84890",
+  branco: "#F8F8F8",
+  rosaClaro: "#F7A8C8",
+  azulSuave: "#34345C",
+  rosaEscuro: "#C93678",
+  textoSecundario: "#6B6B85",
+  textoMutado: "#B3B3C6",
+  bordaClara: "#EDEDF2",
+};
 
 const CATEGORIAS = [
   { id: "todos", label: "Todos" },
@@ -77,14 +100,11 @@ export default function CatalogoSalgados({ navigation }) {
   }
 
   return (
-    <View style={[styles.container,{  backgroundColor: theme.background, }, ]} >
-      <View style={[styles.header,{  backgroundColor: theme.primary,},]} >
-        <TouchableOpacity   onPress={() => navigation.goBack()} style={styles.iconButton}>
-          <Ionicons
-            name="chevron-back"
-            size={22}
-            color={theme.text}
-          />
+    <View style={styles.container}>
+      {/* ───── HEADER ───── */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
+          <Ionicons name="chevron-back" size={22} color={COLORS.branco} />
         </TouchableOpacity>
 
         <Text style={[ styles.headerTitle, { color: theme.surface, },]}> Salgados Avulsos </Text>
@@ -112,7 +132,7 @@ export default function CatalogoSalgados({ navigation }) {
         </View>
       </View>
 
-   
+      {/* ───── BUSCA (aparece ao tocar na lupa) ───── */}
       {busca !== "" && (
         <View style={[ styles.searchBox,{  backgroundColor: theme.surface,borderColor: theme.border, }, ]} >
           <Ionicons
@@ -163,7 +183,7 @@ export default function CatalogoSalgados({ navigation }) {
         />
       </View>
 
- 
+      {/* ───── LISTA DE PRODUTOS ───── */}
       {loading ? (
         <View style={styles.centerBox}>
           <ActivityIndicator
@@ -227,12 +247,13 @@ export default function CatalogoSalgados({ navigation }) {
         />
       )}
 
-  
-      <View
-        style={[ styles.footer, {   backgroundColor: theme.surface,  borderTopColor: theme.border, },]}>
-        <TouchableOpacity   style={[ styles.comboButton,   { backgroundColor: theme.accent,  }, ]}
-          onPress={() => navigation.navigate("TamanhoCombo")} >
-          <Text style={[ styles.comboButtonText, { color: theme.surface, }, ]}> MONTE SEU COMBO</Text>
+      {/* ───── BOTÃO FIXO: MONTE SEU COMBO ───── */}
+      <View style={styles.footer}>
+        <TouchableOpacity
+          style={styles.comboButton}
+          onPress={() => navigation.navigate("Combo")}
+        >
+          <Text style={styles.comboButtonText}>MONTE SEU COMBO</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -295,7 +316,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  /* BUSCA */
+  // Busca
   searchBox: {
     flexDirection: "row",
     alignItems: "center",
@@ -316,7 +337,7 @@ const styles = StyleSheet.create({
 
   },
 
-  /* CATEGORIAS */
+  // Categorias
   categoriasWrapper: {
     marginTop: 14,
   },
@@ -342,7 +363,7 @@ const styles = StyleSheet.create({
 
   },
 
-  /* LISTA */
+  // Lista
   lista: {
     padding: 16,
     paddingBottom: 100,
