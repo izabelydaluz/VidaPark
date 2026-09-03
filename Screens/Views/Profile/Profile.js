@@ -148,7 +148,7 @@ export default function Profile({ navigation }) {
             onPress={item.action}
           >
             <View style={styles.cardLeft}>
-              <Ionicons name={item.icon} size={24} color={theme.primary} style={styles.cardIcon} />
+              <Ionicons name={item.icon} size={24} color={theme.accent} style={styles.cardIcon} />
               <View>
                 <Text style={[styles.cardTitle, { color: theme.primary }]}>{item.title}</Text>
                 <Text style={[styles.cardSubtitle, { color: theme.textSecondary }]}>{item.subtitle}</Text>
@@ -158,7 +158,7 @@ export default function Profile({ navigation }) {
           </TouchableOpacity>
         ))}
 
-        <TouchableOpacity style={[styles.logout, { backgroundColor: theme.primary }]} onPress={logout}>
+        <TouchableOpacity style={[styles.logout, { backgroundColor: theme.accent }]} onPress={logout}>
           <Ionicons name="log-out-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
           <Text style={styles.logoutText}>Sair da conta</Text>
         </TouchableOpacity>

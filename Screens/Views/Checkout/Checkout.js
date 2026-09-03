@@ -1,6 +1,13 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import React, { useState, useCallback } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
+import { auth, db } from "../firebaseConfig";
+import { collection, getDocs } from "firebase/firestore";
+
+function addressesCollection(uid) {
+  return collection(db, "users", uid, "addresses");
+}
 
 // ─────────────────────────────────────────────
 // PALETA "VIDA PARK"
@@ -23,6 +30,21 @@ const FORMAS_PAGAMENTO = [
   { id: "debito", label: "Cartão de débito", icon: "card-outline" },
 ];
 
+function getFullAddress(addr) {
+  if (!addr) return "";
+  return [
+    addr.street,
+    addr.number,
+    addr.complement,
+    addr.neighborhood,
+    addr.city,
+    addr.state,
+    addr.zipCode ? `CEP: ${addr.zipCode}` : "",
+  ]
+    .filter(Boolean)
+    .join(", ");
+}
+
 export default function Checkout({ navigation, route }) {
   // Dados que vieram do Carrinho
   const combo = route?.params?.combo || [];
@@ -30,21 +52,66 @@ export default function Checkout({ navigation, route }) {
   const taxaEntrega = route?.params?.taxaEntrega || 5;
   const totalGeral = route?.params?.totalGeral || totalCombo + taxaEntrega;
 
-  // Mock -- troque pelo endereço real do usuário (Firestore/AsyncStorage) quando o Firebase estiver pronto
-  const [endereco] = useState({
-    rua: "Rua das Flores, 123",
-    bairro: "Centro, São Paulo - SP",
-  });
+  // Endereço agora vem do Firestore (users/{uid}/addresses),
+  // priorizando o que está marcado como "selected" na tela Addresses.
+  const [endereco, setEndereco] = useState(null);
+  const [carregandoEndereco, setCarregandoEndereco] = useState(true);
+
   const [data] = useState("25/05/2025");
   const [horario] = useState("18:00");
   const [formaPagamento, setFormaPagamento] = useState("pix");
   const [enviando, setEnviando] = useState(false);
+
+  const carregarEndereco = useCallback(async () => {
+    try {
+      setCarregandoEndereco(true);
+
+      const uid = auth.currentUser?.uid;
+      if (!uid) {
+        setEndereco(null);
+        setCarregandoEndereco(false);
+        return;
+      }
+
+      const snapshot = await getDocs(addressesCollection(uid));
+      const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+      // Prioridade: endereço marcado como padrão (selected: true).
+      // Se nenhum estiver marcado, cai no primeiro da lista como fallback.
+      const marcado = list.find((a) => a.selected) || list[0] || null;
+
+      setEndereco(marcado);
+    } catch (e) {
+      console.log("Erro ao carregar endereço no Checkout:", e);
+      setEndereco(null);
+    } finally {
+      setCarregandoEndereco(false);
+    }
+  }, []);
+
+  // Recarrega toda vez que a tela ganha foco — assim, ao voltar de
+  // "Addresses" depois de trocar o endereço padrão, o Checkout já
+  // aparece atualizado sem precisar reabrir a tela do zero.
+  useFocusEffect(
+    useCallback(() => {
+      carregarEndereco();
+    }, [carregarEndereco])
+  );
 
   function formatarPreco(valor) {
     return `R$ ${Number(valor || 0).toFixed(2).replace(".", ",")}`;
   }
 
   async function confirmarPedido() {
+    if (!endereco) {
+      Alert.alert(
+        "Endereço necessário",
+        "Adicione um endereço de entrega antes de confirmar o pedido.",
+        [{ text: "Adicionar endereço", onPress: () => navigation.navigate("Addresses") }]
+      );
+      return;
+    }
+
     setEnviando(true);
 
     // ─────────────────────────────────────────────
@@ -56,7 +123,7 @@ export default function Checkout({ navigation, route }) {
     //   amount: totalGeral,
     //   description: combo.map((i) => i.nome).join(", "),
     //   payerInfo: { name, email },
-    //   address: `${endereco.rua}, ${endereco.bairro}`,
+    //   address: getFullAddress(endereco),
     // });
     // navigation.navigate("Pagamento", { checkoutUrl: result.initPoint, ... });
     // ─────────────────────────────────────────────
@@ -87,13 +154,28 @@ export default function Checkout({ navigation, route }) {
               <Text style={styles.alterarLink}>Alterar</Text>
             </TouchableOpacity>
           </View>
-          <View style={styles.enderecoLinha}>
-            <Ionicons name="location-outline" size={18} color={COLORS.rosaVidaPark} />
-            <View style={{ marginLeft: 8 }}>
-              <Text style={styles.enderecoRua}>{endereco.rua}</Text>
-              <Text style={styles.enderecoBairro}>{endereco.bairro}</Text>
+
+          {carregandoEndereco ? (
+            <ActivityIndicator size="small" color={COLORS.rosaVidaPark} />
+          ) : endereco ? (
+            <View style={styles.enderecoLinha}>
+              <Ionicons name="location-outline" size={18} color={COLORS.rosaVidaPark} />
+              <View style={{ marginLeft: 8, flex: 1 }}>
+                <Text style={styles.enderecoRua}>{endereco.label || "Endereço"}</Text>
+                <Text style={styles.enderecoBairro}>{getFullAddress(endereco)}</Text>
+              </View>
             </View>
-          </View>
+          ) : (
+            <TouchableOpacity
+              style={styles.enderecoLinha}
+              onPress={() => navigation.navigate("Addresses")}
+            >
+              <Ionicons name="alert-circle-outline" size={18} color={COLORS.rosaVidaPark} />
+              <Text style={[styles.enderecoBairro, { marginLeft: 8 }]}>
+                Nenhum endereço cadastrado. Toque para adicionar.
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Data e horário */}
