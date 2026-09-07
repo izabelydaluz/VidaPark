@@ -3,7 +3,7 @@ import { WebView } from "react-native-webview";
 import { useProducts } from "../../../context/ProductContext";
 import { auth } from "../../../Firebase/firebaseConfig";
 import * as FileSystem from "expo-file-system/legacy";
-import {styleSheet, View, Text, TouchableOpacity, ActivityIndicator, Alert, FlatList} from "react-native";
+import {StyleSheet, View, Text, TouchableOpacity, ActivityIndicator, Alert, FlatList} from "react-native";
 
 const FUNCTIONS_URL ="https://us-central1-bella-plus-mulherao.cloudfunctions.net";
 

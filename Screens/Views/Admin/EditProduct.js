@@ -5,11 +5,11 @@ import { useState } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import * as ImagePicker from 'expo-image-picker';
 
+
 export default function EditProduct({ navigation, route }) {
     const { produto, aoSalvar } = route.params;
     
     const [nome, setNome] = useState(produto.nome);
-    const [tamanho, setTamanho] = useState(produto.tamanho);
     const [valor, setValor] = useState(String(produto.valor));
     const [descricao, setDescricao] = useState(produto.descricao);
     const [imagem, setImagem] = useState(produto.imagem);
@@ -46,7 +46,6 @@ export default function EditProduct({ navigation, route }) {
             const produtoRef = doc(database, 'produtos', produto.id);
             await updateDoc(produtoRef, {
                 nome,
-                tamanho,
                 valor: parseFloat(valor),
                 descricao,
                 imagem: imagemBase64
@@ -85,23 +84,6 @@ export default function EditProduct({ navigation, route }) {
             <Text style={styles.txt}>Editar Produto</Text>
             
             <TextInput style={styles.barra} placeholder="Nome" value={nome} onChangeText={setNome} placeholderTextColor={'#e58aaa'} />
-            
-            <View style={styles.barraPicker}>
-                <Picker
-                    selectedValue={tamanho}
-                    onValueChange={(itemValue) => setTamanho(itemValue)}
-                    style={styles.picker}
-                    dropdownIconColor="#e58aaa"
-                    mode="dropdown"
-                >
-                    <Picker.Item label="Selecionar Tamanho" value="" color="#e58aaa" style={styles.itemPicker} />
-                    <Picker.Item label="P" value="P" color="#ffffff" style={styles.itemPicker} />
-                    <Picker.Item label="M" value="M" color="#ffffff" style={styles.itemPicker} />
-                    <Picker.Item label="G" value="G" color="#ffffff" style={styles.itemPicker} />
-                    <Picker.Item label="GG" value="GG" color="#ffffff" style={styles.itemPicker} />
-                </Picker>
-            </View>
-
             <TextInput style={styles.barra} placeholder="Valor" value={valor} onChangeText={setValor} placeholderTextColor={'#e58aaa'} />
             <TextInput style={styles.barra} placeholder="Descrição" value={descricao} onChangeText={setDescricao} placeholderTextColor={'#e58aaa'} />
 
@@ -179,17 +161,6 @@ const styles = StyleSheet.create({
         borderColor: '#8b3151',
         alignSelf: 'center',
         color: '#ffffff',
-    },
-    barraPicker: {
-        width: 280,
-        borderRadius: 12,
-        marginVertical: 8,
-        borderWidth: 1,
-        borderColor: '#8b3151',
-        alignSelf: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden',
-        backgroundColor: '#3d0c1e',
     },
     picker: {
         width: '100%',

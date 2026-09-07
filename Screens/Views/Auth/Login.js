@@ -1,4 +1,4 @@
-import { TextInput,Text,StyleSheet,Alert,ImageBackground,View,TouchableOpacity,Linking,useWindowDimensions} from "react-native";
+import { TextInput, Text, StyleSheet, Alert, ImageBackground, View, TouchableOpacity, Linking, useWindowDimensions} from "react-native";
 import { Button } from "react-native-paper";
 import { useState } from "react";
 

@@ -1,7 +1,7 @@
-import { View,Text,StyleSheet,TextInput,TouchableOpacity,Alert,ScrollView,ActivityIndicator} from "react-native";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView, ActivityIndicator} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { auth } from "../../../Firebase/firebaseConfig";
-import {updatePassword,reauthenticateWithCredential,EmailAuthProvider} from "firebase/auth";
+import {updatePassword, reauthenticateWithCredential, EmailAuthProvider} from "firebase/auth";
 import { useTheme } from "../../../context/ThemeContext";
 
 export default function ChangePassword({ navigation }) {

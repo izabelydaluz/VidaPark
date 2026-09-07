@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text,FlatList, TouchableOpacity, Image, TextInput, StyleSheet, ActivityIndicator,} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { collection, getDocs } from "firebase/firestore";
+import { useTheme } from "../../../context/ThemeContext";
 import { db as database } from "../../../Firebase/firebaseConfig";
 
 
@@ -90,13 +91,13 @@ export default function CatalogoSalgados({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* ───── HEADER ───── */}
+      {/* ----- HEADER ----- */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
-          <Ionicons name="chevron-back" size={22} color={COLORS.branco} />
+          <Ionicons name="chevron-back" size={22} color={theme.text} />
         </TouchableOpacity>
 
-        <Text style={[ styles.headerTitle, { color: theme.surface, },]}> Salgados Avulsos </Text>
+        <Text style={[ styles.headerTitle, { color: theme.text, },]}> Salgados Avulsos </Text>
         <View style={styles.headerIcons}>
            <TouchableOpacity style={styles.iconButton} onPress={() =>setBusca(busca === "" ? " " : "")}>
             <Ionicons
@@ -121,7 +122,7 @@ export default function CatalogoSalgados({ navigation }) {
         </View>
       </View>
 
-      {/* ───── BUSCA (aparece ao tocar na lupa) ───── */}
+      {/* ----- BUSCA (aparece ao tocar na lupa) ----- */}
       {busca !== "" && (
         <View style={[ styles.searchBox,{  backgroundColor: theme.surface,borderColor: theme.border, }, ]} >
           <Ionicons
@@ -172,7 +173,7 @@ export default function CatalogoSalgados({ navigation }) {
         />
       </View>
 
-      {/* ───── LISTA DE PRODUTOS ───── */}
+      {/* ----- LISTA DE PRODUTOS ----- */}
       {loading ? (
         <View style={styles.centerBox}>
           <ActivityIndicator
@@ -223,24 +224,16 @@ export default function CatalogoSalgados({ navigation }) {
               </View>
 
             
-              <TouchableOpacity
-                style={[  styles.addButton, {  backgroundColor: theme.accent, },]} onPress={() => adicionarRapido(item)}>
-                <Ionicons
-                  name="add"
-                  size={20}
-                  color={theme.surface}
-                />
-              </TouchableOpacity>
             </View>
           )}
         />
       )}
 
-      {/* ───── BOTÃO FIXO: MONTE SEU COMBO ───── */}
+      {/* ----- BOTÃO FIXO: MONTE SEU COMBO ----- */}
       <View style={styles.footer}>
         <TouchableOpacity
           style={styles.comboButton}
-          onPress={() => navigation.navigate("Combo")}
+          onPress={() => navigation.navigate("TamanhoCombo")}
         >
           <Text style={styles.comboButtonText}>MONTE SEU COMBO</Text>
         </TouchableOpacity>
@@ -257,7 +250,7 @@ const styles = StyleSheet.create({
 
   /* HEADER */
   header: {
-
+    backgroundColor: COLORS.azulVidaPark,
     paddingTop: 55,
     paddingHorizontal: 16,
     paddingBottom: 16,
@@ -435,7 +428,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-
+    backgroundColor: COLORS.rosaVidaPark,
     padding: 16,
     borderTopWidth: 1,
 

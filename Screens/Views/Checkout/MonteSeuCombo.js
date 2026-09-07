@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndi
 import { Ionicons } from "@expo/vector-icons";
 import { collection, getDocs } from "firebase/firestore";
 import { db as database } from "../../../Firebase/firebaseConfig";
+import { useTheme } from "../../../context/ThemeContext";
 
 const COLORS = {
   azulVidaPark: "#202040",

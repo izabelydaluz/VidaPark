@@ -4,6 +4,7 @@ import { auth } from "../../../Firebase/firebaseConfig";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { useTheme } from "../../../context/ThemeContext";
 import * as FileSystem from "expo-file-system/legacy";
+import React, { useState, useEffect } from "react";
 
 const PROFILE_FILE = `${FileSystem.documentDirectory}bellaplus_profile.json`;
 
