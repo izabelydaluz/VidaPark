@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { IconButton } from "react-native-paper"; 
-import { auth, signOut } from "../../../firebaseConfig";
+import { IconButton } from "react-native-paper";
+import { auth } from "../../../Firebase/firebaseConfig";
+import { signOut } from "firebase/auth";
 
 export default function ADM({ navigation }) {
   function handleLogout() {

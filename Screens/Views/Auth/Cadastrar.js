@@ -4,7 +4,7 @@ import { Button } from "react-native-paper";
 
 import Entypo from "@expo/vector-icons/Entypo";
 
-import { auth, database } from "../firebaseConfig";
+import { auth, db as database } from "../../../Firebase/firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 

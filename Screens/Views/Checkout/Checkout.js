@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert } from "react-native";
+import {View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert,} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
-import { auth, db } from "../firebaseConfig";
+import { auth, db } from "../../../Firebase/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 
 function addressesCollection(uid) {

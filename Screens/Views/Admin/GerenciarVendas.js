@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Alert, Modal, TouchableOpacity, ScrollView } from 'react-native';
 import { IconButton, Button } from 'react-native-paper';
-import { database } from '../../../firebaseConfig';
+import { db as database } from '../../../Firebase/firebaseConfig';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { useTheme } from '../../../context/ThemeContext';
 

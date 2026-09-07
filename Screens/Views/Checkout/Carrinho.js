@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
-import { View,Text,FlatList,TouchableOpacity,StyleSheet,} from "react-native";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "../context/ThemeContext";
+import { useTheme } from "../../../context/ThemeContext";
 
 const TAXA_ENTREGA = 5.0;
 

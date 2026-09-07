@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, FlatList, Alert } from 'react-native';
 import { Button, IconButton } from "react-native-paper";
-import { database } from '../../../firebaseConfig';
+import { database } from '../../../Firebase/firebaseConfig';
 import { useState, useEffect } from 'react';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import CardProduct from '../../../components/CardProduct';

@@ -1,10 +1,9 @@
 import { View, Text, TextInput, StyleSheet, Image, Alert } from 'react-native';
 import { Button } from "react-native-paper";
-import { database } from '../../../firebaseConfig';
+import { db as database } from '../../../Firebase/firebaseConfig';
 import { useState } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import * as ImagePicker from 'expo-image-picker';
-import { Picker } from '@react-native-picker/picker';
 
 export default function EditProduct({ navigation, route }) {
     const { produto, aoSalvar } = route.params;

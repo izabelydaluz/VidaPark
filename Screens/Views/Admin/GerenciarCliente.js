@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, FlatList, Alert } from 'react-native';
 import { IconButton } from "react-native-paper";
-import { database } from '../../../firebaseConfig';
+import { db as database } from '../../../Firebase/firebaseConfig';
 import { useState, useEffect } from 'react';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { useTheme } from '../../../context/ThemeContext';

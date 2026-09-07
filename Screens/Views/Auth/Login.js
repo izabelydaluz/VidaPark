@@ -1,13 +1,14 @@
 import { TextInput,Text,StyleSheet,Alert,ImageBackground,View,TouchableOpacity,Linking,useWindowDimensions} from "react-native";
 import { Button } from "react-native-paper";
 import { useState } from "react";
-import { auth, database } from "../firebaseConfig";
+
+import { auth, db as database } from "../../../Firebase/firebaseConfig";
 import {signInWithEmailAndPassword,signOut} from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import Entypo from '@expo/vector-icons/Entypo';
 
-const imagemDesktop = require("../Images/logo.png");
-const imagemMobile = require("../Images/logo.png");
+const imagemDesktop = require("../../../Images/logo.png");
+const imagemMobile = require("../../../Images/logo.png");
 
 const abrirInstagram = async () => {
 

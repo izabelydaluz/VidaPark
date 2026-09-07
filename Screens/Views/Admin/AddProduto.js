@@ -1,6 +1,6 @@
-import {View,Text,TextInput,StyleSheet,Image,Alert} from 'react-native';
+import { View, Text, TextInput, StyleSheet, Image, Alert } from 'react-native';
 import { Button } from 'react-native-paper';
-import { database } from '../../../firebaseConfig';
+import { db as database } from '../../../Firebase/firebaseConfig';
 import { useState } from 'react';
 import { addDoc, collection } from 'firebase/firestore';
 import * as ImagePicker from 'expo-image-picker';

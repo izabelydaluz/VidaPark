@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { auth, signOut, onAuthStateChanged } from "../../../firebaseConfig";
+import { auth } from "../../../Firebase/firebaseConfig";
+import { signOut, onAuthStateChanged } from "firebase/auth";
 import { useTheme } from "../../../context/ThemeContext";
 import * as FileSystem from "expo-file-system/legacy";
 

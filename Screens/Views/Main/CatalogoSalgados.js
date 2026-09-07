@@ -1,21 +1,10 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  TextInput,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text,FlatList, TouchableOpacity, Image, TextInput, StyleSheet, ActivityIndicator,} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { collection, getDocs } from "firebase/firestore";
-import { database } from "../firebaseConfig";
+import { db as database } from "../../../Firebase/firebaseConfig";
 
-// ─────────────────────────────────────────────
-// PALETA "VIDA PARK"
-// ─────────────────────────────────────────────
+
 const COLORS = {
   azulVidaPark: "#202040",
   rosaVidaPark: "#E84890",

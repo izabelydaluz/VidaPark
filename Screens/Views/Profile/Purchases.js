@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import {View,Text,StyleSheet,FlatList,TouchableOpacity,ActivityIndicator} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { database, auth } from "../../../firebaseConfig";
+import { db as database, auth } from "../../../Firebase/firebaseConfig";
 import { useTheme } from "../../../context/ThemeContext";
 
 export default function Purchases({ navigation }) {

@@ -4,7 +4,7 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import About from "../components/About";
 import Contact from "../components/Contact";
 import { useTheme } from "../context/ThemeContext";
-import { auth, database } from "../firebaseConfig";
+import { auth, db as database } from "../Firebase/firebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
 
 const IMG_PACOTES = {
