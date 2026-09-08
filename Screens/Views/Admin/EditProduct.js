@@ -43,7 +43,7 @@ export default function EditProduct({ navigation, route }) {
                 });
             }
 
-            const produtoRef = doc(database, 'produtos', produto.id);
+            const produtoRef = doc(database, 'salgados', produto.id);
             await updateDoc(produtoRef, {
                 nome,
                 valor: parseFloat(valor),

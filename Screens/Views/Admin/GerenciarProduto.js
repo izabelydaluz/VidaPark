@@ -227,36 +227,8 @@ export default function GerenciarProduto({ navigation }) {
                           size={11}
                           color={COLORS.textoSecundario}
                         />
-                        <Text style={styles.tagCinzaTexto}>
-                          Tamanho: {item.tamanho}
-                        </Text>
                       </View>
                     )}
-
-                    <View
-                      style={[
-                        styles.tagStatus,
-                        !disponivel && styles.tagStatusIndisponivel,
-                      ]}
-                    >
-                      <Ionicons
-                        name={
-                          disponivel
-                            ? "checkmark-circle"
-                            : "close-circle-outline"
-                        }
-                        size={11}
-                        color={disponivel ? COLORS.verde : COLORS.vermelhoExcluir}
-                      />
-                      <Text
-                        style={[
-                          styles.tagStatusTexto,
-                          !disponivel && styles.tagStatusTextoIndisponivel,
-                        ]}
-                      >
-                        {disponivel ? "Disponível" : "Indisponível"}
-                      </Text>
-                    </View>
                   </View>
                 </View>
 
