@@ -3,6 +3,7 @@ import { IconButton, Button } from 'react-native-paper';
 import { db as database } from '../../../Firebase/firebaseConfig';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { useTheme } from '../../../context/ThemeContext';
+import { useState, useEffect } from "react";
 
 export default function GerenciarVendas({ navigation }) {
   const { theme } = useTheme();
@@ -10,9 +11,15 @@ export default function GerenciarVendas({ navigation }) {
   const [vendaSelecionada, setVendaSelecionada] = useState(null);
   const [modalVisivel, setModalVisivel] = useState(false);
 
+  // ─────────────────────────────────────────────
+  // OPÇÃO 1 (temporária): lê direto da coleção "pedidos",
+  // já que ainda não existe integração real com Mercado Pago
+  // gravando em "payments". Quando essa integração existir
+  // (Opção 2), volte a buscar de "payments" aqui.
+  // ─────────────────────────────────────────────
   async function carregarVendas() {
     try {
-      const querySnapshot = await getDocs(collection(database, 'payments'));
+      const querySnapshot = await getDocs(collection(database, 'pedidos'));
       const lista = [];
       querySnapshot.forEach((doc) => {
         lista.push({ id: doc.id, ...doc.data() });
@@ -35,7 +42,7 @@ export default function GerenciarVendas({ navigation }) {
     }
 
     try {
-      const vendaRef = doc(database, 'payments', id);
+      const vendaRef = doc(database, 'pedidos', id);
       await updateDoc(vendaRef, { status: novoStatus });
 
       setVendas((prev) =>
@@ -47,7 +54,7 @@ export default function GerenciarVendas({ navigation }) {
           }
         })
       );
-      
+
       if (vendaSelecionada) {
         if (vendaSelecionada.id === id) {
           setVendaSelecionada({ ...vendaSelecionada, status: novoStatus });
@@ -59,26 +66,34 @@ export default function GerenciarVendas({ navigation }) {
     }
   }
 
+  // Traduz os status usados na coleção "pedidos"
+  // (em_preparacao, saiu_para_entrega, entregue, cancelado)
   function traduzirStatus(status) {
     if (!status) {
       return 'Pendente';
     }
-    
+
     const statusLower = status.toLowerCase();
-    
-    if (statusLower === 'approved' || statusLower === 'aprovado') {
-      return 'Aprovado';
+
+    if (statusLower === 'entregue') {
+      return 'Entregue';
     }
-    if (statusLower === 'cancelled' || statusLower === 'cancelado' || statusLower === 'rejected' || statusLower === 'recusado') {
+    if (statusLower === 'saiu_para_entrega') {
+      return 'Saiu para entrega';
+    }
+    if (statusLower === 'cancelado') {
       return 'Cancelado';
     }
-    
+    if (statusLower === 'em_preparacao') {
+      return 'Em preparação';
+    }
+
     return 'Pendente';
   }
 
   function obterEstiloStatus(status) {
     const statusTraduzido = traduzirStatus(status);
-    if (statusTraduzido === 'Aprovado') {
+    if (statusTraduzido === 'Entregue') {
       return styles.statusAprovado;
     }
     if (statusTraduzido === 'Cancelado') {
@@ -92,6 +107,18 @@ export default function GerenciarVendas({ navigation }) {
       return value;
     }
     return `R$ ${value.toFixed(2).replace(".", ",")}`;
+  }
+
+  // Monta uma descrição legível a partir dos itens do pedido
+  function descreverItens(itens) {
+    if (!Array.isArray(itens) || itens.length === 0) {
+      return "Pedido sem itens";
+    }
+
+    return itens
+      .map((item) => item?.nome || item?.label || "Item")
+      .filter(Boolean)
+      .join(", ");
   }
 
   function abrirComprovante(venda) {
@@ -113,12 +140,8 @@ export default function GerenciarVendas({ navigation }) {
           keyExtractor={item => item.id}
           contentContainerStyle={{ paddingBottom: 20, flexGrow: 1 }}
           renderItem={({ item }) => {
-            let nomeExibicao = "";
-            if (item.description) {
-              nomeExibicao = item.description;
-            } else {
-              nomeExibicao = "Produto Sem Nome";
-            }
+            const nomeExibicao = descreverItens(item.itens);
+            const endereco = item.endereco?.enderecoCompleto;
 
             return (
               <TouchableOpacity style={[styles.itemVenda, { borderBottomColor: theme.border }]} onPress={() => abrirComprovante(item)} activeOpacity={0.8}>
@@ -127,14 +150,14 @@ export default function GerenciarVendas({ navigation }) {
                     {nomeExibicao}
                   </Text>
                   <Text style={[styles.txtValor, { color: theme.text }]}>
-                    Valor: {formatMoney(item.amount)}
+                    Valor: {formatMoney(item.total)}
                   </Text>
                   <Text style={[styles.txtStatus, obterEstiloStatus(item.status)]}>
                     Status: {traduzirStatus(item.status)}
                   </Text>
-                  {item.address ? (
+                  {endereco ? (
                     <Text style={[styles.txtEndereco, { color: theme.text }]} numberOfLines={1}>
-                      Endereço: {item.address}
+                      Endereço: {endereco}
                     </Text>
                   ) : null}
                 </View>
@@ -167,36 +190,36 @@ export default function GerenciarVendas({ navigation }) {
             <ScrollView contentContainerStyle={styles.reciboCorpo}>
               {vendaSelecionada ? (
                 <>
-                  <Text style={styles.reciboTextoLabel}>ID DO PRODUTO / DOCUMENTO:</Text>
+                  <Text style={styles.reciboTextoLabel}>ID DO PEDIDO:</Text>
                   <Text style={styles.reciboTextoValor}>{vendaSelecionada.id}</Text>
 
-                  <Text style={styles.reciboTextoLabel}>DESCRIÇÃO:</Text>
+                  <Text style={styles.reciboTextoLabel}>ITENS:</Text>
                   <Text style={styles.reciboTextoValor}>
-                    {vendaSelecionada.description ? vendaSelecionada.description : 'Não informada'}
+                    {descreverItens(vendaSelecionada.itens)}
                   </Text>
 
                   <Text style={styles.reciboTextoLabel}>MÉTODO DE PAGAMENTO:</Text>
                   <Text style={styles.reciboTextoValor}>
-                    {vendaSelecionada.paymentMethod ? vendaSelecionada.paymentMethod.toUpperCase() : 'PIX / CARTÃO'}
+                    {vendaSelecionada.formaPagamento ? vendaSelecionada.formaPagamento.toUpperCase() : 'NÃO INFORMADO'}
                   </Text>
 
-                  <Text style={styles.reciboTextoLabel}>ID MERCADO PAGO:</Text>
+                  <Text style={styles.reciboTextoLabel}>DATA / HORÁRIO:</Text>
                   <Text style={styles.reciboTextoValor}>
-                    {vendaSelecionada.mpId ? vendaSelecionada.mpId : 'N/A'}
+                    {vendaSelecionada.data || 'N/A'} {vendaSelecionada.horario ? `às ${vendaSelecionada.horario}` : ''}
                   </Text>
 
-                  {vendaSelecionada.address ? (
+                  {vendaSelecionada.endereco?.enderecoCompleto ? (
                     <>
                       <Text style={styles.reciboTextoLabel}>ENDEREÇO DE ENTREGA:</Text>
-                      <Text style={styles.reciboTextoValor}>{vendaSelecionada.address}</Text>
+                      <Text style={styles.reciboTextoValor}>{vendaSelecionada.endereco.enderecoCompleto}</Text>
                     </>
                   ) : null}
-                  
+
                   <Text style={styles.reciboLinha}>-----------------------------------------</Text>
 
                   <Text style={styles.reciboTotalLabel}>TOTAL:</Text>
-                  <Text style={styles.reciboTotalValor}>{formatMoney(vendaSelecionada.amount)}</Text>
-                  
+                  <Text style={styles.reciboTotalValor}>{formatMoney(vendaSelecionada.total)}</Text>
+
                   <Text style={styles.reciboTotalLabel}>STATUS ATUAL:</Text>
                   <Text style={[styles.reciboStatus, obterEstiloStatus(vendaSelecionada.status)]}>
                     {traduzirStatus(vendaSelecionada.status).toUpperCase()}
@@ -208,23 +231,23 @@ export default function GerenciarVendas({ navigation }) {
             </ScrollView>
 
             <Text style={styles.reciboLinha}>-----------------------------------------</Text>
-            
+
             <View style={styles.botoesModal}>
-              <Button 
-                mode="contained" 
-                buttonColor="#E84890" 
+              <Button
+                mode="contained"
+                buttonColor="#E84890"
                 style={styles.btnAcao}
                 onPress={() => {
                   if (vendaSelecionada) {
-                    alterarStatusVenda(vendaSelecionada.id, 'aprovado');
+                    alterarStatusVenda(vendaSelecionada.id, 'entregue');
                   }
                 }}
               >
-                Aprovar
+                Marcar como Entregue
               </Button>
-              <Button 
-                mode="contained" 
-                buttonColor="#C93678" 
+              <Button
+                mode="contained"
+                buttonColor="#C93678"
                 style={styles.btnAcao}
                 onPress={() => {
                   if (vendaSelecionada) {
@@ -236,9 +259,9 @@ export default function GerenciarVendas({ navigation }) {
               </Button>
             </View>
 
-            <Button 
-              mode="outlined" 
-              textColor={theme.primary} 
+            <Button
+              mode="outlined"
+              textColor={theme.primary}
               style={[styles.btnFechar, { borderColor: theme.primary }]}
               onPress={() => setModalVisivel(false)}
             >
@@ -261,13 +284,13 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 3, height: 3 },
     textShadowRadius: 6,
     letterSpacing: 2,
-    
-    
+
+
   },
   container: {
     flex: 1,
     paddingTop: 40,
-    
+
   },
   cardContainer: {
     flex: 1,

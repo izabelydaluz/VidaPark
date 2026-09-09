@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView,
 import { Ionicons } from "@expo/vector-icons";
 import { auth } from "../../../Firebase/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
+import { useState, useEffect } from "react";
 
 import { useTheme } from "../../../context/ThemeContext";
 import * as ImagePicker from "expo-image-picker";

@@ -2,7 +2,8 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView,
 import { Ionicons } from "@expo/vector-icons";
 import { auth } from "../../../Firebase/firebaseConfig";
 import {updatePassword, reauthenticateWithCredential, EmailAuthProvider} from "firebase/auth";
-import { useTheme } from "../../../context/ThemeContext";
+import { useTheme, } from "../../../context/ThemeContext";
+import { useState, useEffect } from "react";
 
 export default function ChangePassword({ navigation }) {
   const [currentPassword, setCurrentPassword] = useState("");

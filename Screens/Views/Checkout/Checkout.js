@@ -3,7 +3,7 @@ import {View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator,
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { auth, db } from "../../../Firebase/firebaseConfig";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
 
 function addressesCollection(uid) {
   return collection(db, "users", uid, "addresses");
@@ -43,6 +43,18 @@ function getFullAddress(addr) {
   ]
     .filter(Boolean)
     .join(", ");
+}
+
+// Soma a quantidade de itens do combo para gravar em "unidades".
+// Se cada item já tiver um campo "quantidade", usa a soma; senão,
+// conta 1 por item como fallback.
+function contarUnidades(combo) {
+  if (!Array.isArray(combo) || combo.length === 0) return 0;
+
+  return combo.reduce((total, item) => {
+    const quantidade = Number(item?.quantidade ?? item?.qtd ?? 1);
+    return total + (Number.isFinite(quantidade) ? quantidade : 1);
+  }, 0);
 }
 
 export default function Checkout({ navigation, route }) {
@@ -112,6 +124,16 @@ export default function Checkout({ navigation, route }) {
       return;
     }
 
+    const uid = auth.currentUser?.uid;
+
+    if (!uid) {
+      Alert.alert(
+        "Sessão necessária",
+        "Faça login novamente para confirmar o pedido."
+      );
+      return;
+    }
+
     setEnviando(true);
 
     // ─────────────────────────────────────────────
@@ -126,12 +148,42 @@ export default function Checkout({ navigation, route }) {
     //   address: getFullAddress(endereco),
     // });
     // navigation.navigate("Pagamento", { checkoutUrl: result.initPoint, ... });
+    //
+    // Por enquanto, gravamos o pedido direto como "em_preparacao"
+    // assim que o cliente confirma.
     // ─────────────────────────────────────────────
 
-    setTimeout(() => {
+    try {
+      await addDoc(collection(db, "pedidos"), {
+        userId: uid,
+        itens: combo,
+        unidades: contarUnidades(combo),
+        totalCombo,
+        taxaEntrega,
+        total: totalGeral,
+        data,
+        horario,
+        formaPagamento,
+        endereco: {
+          label: endereco.label || "Endereço",
+          enderecoCompleto: getFullAddress(endereco),
+        },
+        status: "em_preparacao",
+        createdAt: serverTimestamp(),
+      });
+
       setEnviando(false);
       navigation.navigate("MeusPedidos", { pedidoConfirmado: true });
-    }, 800);
+    } catch (error) {
+      console.error("ERRO AO CONFIRMAR PEDIDO:", error);
+
+      setEnviando(false);
+
+      Alert.alert(
+        "Erro",
+        error?.message || "Não foi possível confirmar o pedido. Tente novamente."
+      );
+    }
   }
 
   return (

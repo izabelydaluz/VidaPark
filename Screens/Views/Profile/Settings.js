@@ -4,6 +4,8 @@ import { auth } from "../../../Firebase/firebaseConfig";
 import { signOut } from "firebase/auth";
 import { useProducts } from "../../../context/ProductContext";
 import { useTheme } from "../../../context/ThemeContext";
+import { useState } from "react";
+
 export default function Settings({ navigation }) {
   const { clearCart, clearFavorites } = useProducts();
   const { theme, toggleTheme } = useTheme();
@@ -64,7 +66,7 @@ export default function Settings({ navigation }) {
   }
 
   function openSupport() {
-    Linking.openURL("mailto:bellaplusmulherao@gmail.com");
+    Linking.openURL("mailto:VidaPark@gmail.com");
   }
 
   const menuItems = [
@@ -108,14 +110,14 @@ export default function Settings({ navigation }) {
         },
         {
           title: "Suporte",
-          subtitle: "bellaplusmulherao@gmail.com",
+          subtitle: "VidaPark.com",
           icon: "mail-outline",
           type: "action",
           onPress: openSupport,
         },
         {
           title: "Versao do aplicativo",
-          subtitle: `Bella Plus v${version}`,
+          subtitle: `Vida Park v${version}`,
           icon: "information-circle-outline",
           type: "info",
         },

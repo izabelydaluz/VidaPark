@@ -1,6 +1,9 @@
-import React, { useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useState, useCallback } from "react";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
+import { auth, db } from "../Firebase/firebaseConfig";
+import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 
 // ─────────────────────────────────────────────
 // PALETA "VIDA PARK"
@@ -27,26 +30,6 @@ const ABAS = [
   { id: "concluidos", label: "Concluídos" },
 ];
 
-// Mock -- troque pela busca real no Firestore (collection "pedidos") quando o Firebase estiver pronto
-const PEDIDOS_MOCK = [
-  {
-    id: "1258",
-    status: "em_preparacao",
-    data: "25/05/2025",
-    horario: "18:00",
-    unidades: 30,
-    total: 50.0,
-  },
-  {
-    id: "1187",
-    status: "entregue",
-    data: "10/05/2025",
-    horario: "19:30",
-    unidades: 50,
-    total: 75.0,
-  },
-];
-
 function statusInfo(status) {
   switch (status) {
     case "em_preparacao":
@@ -68,7 +51,61 @@ function formatarPreco(valor) {
 
 export default function MeusPedidos({ navigation }) {
   const [abaAtiva, setAbaAtiva] = useState("todos");
-  const [pedidos] = useState(PEDIDOS_MOCK);
+  const [pedidos, setPedidos] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+
+  const carregarPedidos = useCallback(async () => {
+    try {
+      setCarregando(true);
+
+      const uid = auth.currentUser?.uid;
+
+      if (!uid) {
+        setPedidos([]);
+        setCarregando(false);
+        return;
+      }
+
+      const pedidosRef = collection(db, "pedidos");
+
+      const pedidosQuery = query(
+        pedidosRef,
+        where("userId", "==", uid),
+        orderBy("createdAt", "desc")
+      );
+
+      const snapshot = await getDocs(pedidosQuery);
+
+      const lista = snapshot.docs.map((item) => {
+        const dados = item.data();
+
+        return {
+          id: item.id,
+          status: dados.status || "em_preparacao",
+          data: dados.data || "",
+          horario: dados.horario || "",
+          unidades: dados.unidades || 0,
+          total: dados.total || 0,
+        };
+      });
+
+      setPedidos(lista);
+    } catch (error) {
+      console.error("ERRO AO CARREGAR PEDIDOS:", error);
+      setPedidos([]);
+    } finally {
+      setCarregando(false);
+    }
+  }, []);
+
+  // Recarrega toda vez que a tela ganha foco — assim, ao voltar do
+  // Checkout depois de confirmar um pedido novo, a lista já aparece
+  // atualizada sem precisar reabrir a tela do zero.
+  useFocusEffect(
+    useCallback(() => {
+      carregarPedidos();
+    }, [carregarPedidos])
+  );
 
   const pedidosFiltrados = pedidos.filter((pedido) => {
     if (abaAtiva === "todos") return true;
@@ -100,7 +137,11 @@ export default function MeusPedidos({ navigation }) {
       </View>
 
       {/* Lista */}
-      {pedidosFiltrados.length === 0 ? (
+      {carregando ? (
+        <View style={styles.emptyBox}>
+          <ActivityIndicator size="large" color={COLORS.rosaVidaPark} />
+        </View>
+      ) : pedidosFiltrados.length === 0 ? (
         <View style={styles.emptyBox}>
           <Ionicons name="receipt-outline" size={48} color={COLORS.textoMutado} />
           <Text style={styles.emptyText}>Nenhum pedido por aqui ainda</Text>

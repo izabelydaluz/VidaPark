@@ -5,6 +5,15 @@ import * as FileSystem from "expo-file-system/legacy";
 import { useTheme } from "../../../context/ThemeContext";
 
 // ======================================================
+// IMPORTS DO FIREBASE (ADICIONADOS)
+// ======================================================
+// ATENÇÃO: ajuste o caminho abaixo para o local real do seu
+// arquivo de configuração do Firebase (onde "auth" e "db"
+// são exportados via getAuth(app) e getFirestore(app)).
+import { auth, db } from "../../../Firebase/firebaseConfig";
+import {collection,onSnapshot, doc,setDoc,addDoc,deleteDoc,writeBatch} from "firebase/firestore";
+
+// ======================================================
 // REFERÊNCIA DA COLEÇÃO DE ENDEREÇOS
 // users/{uid}/addresses
 // ======================================================
