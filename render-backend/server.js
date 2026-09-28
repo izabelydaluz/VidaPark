@@ -1,16 +1,38 @@
-const admin = require("firebase-admin");
+const express = require("express");
+const cors = require("cors");
 const axios = require("axios");
 const crypto = require("crypto");
-const functions = require("firebase-functions");
+const admin = require("firebase-admin");
 
-admin.initializeApp();
+// ─────────────────────────────────────────────
+// Firebase Admin — precisa de uma Service Account
+// (veja instruções no README sobre como gerar e configurar
+// a variável de ambiente FIREBASE_SERVICE_ACCOUNT no Render)
+// ─────────────────────────────────────────────
+const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT;
+if (!serviceAccountJson) {
+  console.error("FALTA a variável de ambiente FIREBASE_SERVICE_ACCOUNT");
+}
+const serviceAccount = serviceAccountJson ? JSON.parse(serviceAccountJson) : null;
+
+admin.initializeApp({
+  credential: serviceAccount
+    ? admin.credential.cert(serviceAccount)
+    : admin.credential.applicationDefault(),
+});
+
+const app = express();
+app.use(cors({ origin: true }));
+app.use(express.json());
 
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
 const MP_API = "https://api.mercadopago.com/v1";
-const WEBHOOK_URL = "https://us-central1-vidapark-8eb28.cloudfunctions.net/mercadopagoWebhook";
+// Depois do primeiro deploy no Render, você vai ter uma URL tipo
+// https://vidapark-api.onrender.com — defina ela na variável de
+// ambiente PUBLIC_URL no painel do Render (Environment).
+const PUBLIC_URL = process.env.PUBLIC_URL || "";
+const WEBHOOK_URL = `${PUBLIC_URL}/mercadopagoWebhook`;
 const MP_WEBHOOK_SECRET = process.env.MP_WEBHOOK_SECRET || "";
-
-
 
 function authHeaders() {
   return { Authorization: `Bearer ${MP_ACCESS_TOKEN}`, "Content-Type": "application/json" };
@@ -26,40 +48,16 @@ function buildPayerInfo(pi) {
   };
 }
 
-function getExpirationDate(method) {
-  const n = new Date();
-  if (method === "pix") return new Date(n.getTime() + 86400000).toISOString();
-  if (method === "boleto") return new Date(n.getTime() + 259200000).toISOString();
-  return null;
-}
-
 function ok(res, data) {
-  res.set("Access-Control-Allow-Origin", "*");
   res.status(200).json(data);
 }
 
 function fail(res, code, msg) {
-  res.set("Access-Control-Allow-Origin", "*");
   res.status(200).json({ error: { status: code, message: msg } });
 }
 
-async function getBody(req) {
-  if (req.body && typeof req.body === "object" && Object.keys(req.body).length > 0) {
-    return req.body;
-  }
-  try {
-    if (typeof req.body === "string") return JSON.parse(req.body);
-  } catch {}
-  return new Promise((resolve) => {
-    let raw = "";
-    req.on("data", (c) => raw += c);
-    req.on("end", () => { try { resolve(JSON.parse(raw)); } catch { resolve({}); } });
-  });
-}
-
-exports.createPayment = functions.https.onRequest(async (req, res) => {
-  if (req.method === "OPTIONS") return res.status(204).send("");
-  const data = await getBody(req);
+app.post("/createPayment", async (req, res) => {
+  const data = req.body || {};
   const { paymentMethod, amount, description, payerInfo, cardInfo, installments, deviceFingerprint } = data;
 
   if (!amount || !paymentMethod || !payerInfo?.email) {
@@ -158,16 +156,13 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
     console.error("MP payment error:", JSON.stringify({ status: statusCode, data: mpErr, requestBody: reqData }, null, 2));
     const causes = mpErr?.cause || [];
     const causeStr = causes.map((c) => `código ${c.code || "?"} ${c.description || ""}`).join(" | ");
-    const full = JSON.stringify(mpErr);
     const firstCause = causes[0] || {};
     fail(res, "INTERNAL", `Erro MP (${statusCode}): ${causeStr || `código ${firstCause.code} ${firstCause.description}` || mpErr?.message || "Erro desconhecido"}`);
   }
 });
 
-exports.getPaymentStatus = functions.https.onRequest(async (req, res) => {
-  if (req.method === "OPTIONS") return res.status(204).send("");
-  const data = await getBody(req);
-  const { paymentId } = data;
+app.post("/getPaymentStatus", async (req, res) => {
+  const { paymentId } = req.body || {};
   if (!paymentId) return fail(res, "INVALID_ARGUMENT", "paymentId é obrigatório");
   try {
     const r = await axios.get(`${MP_API}/payments/${paymentId}`, { headers: authHeaders() });
@@ -184,10 +179,8 @@ exports.getPaymentStatus = functions.https.onRequest(async (req, res) => {
   }
 });
 
-exports.createCardToken = functions.https.onRequest(async (req, res) => {
-  if (req.method === "OPTIONS") return res.status(204).send("");
-  const data = await getBody(req);
-  const { cardNumber, expirationMonth, expirationYear, securityCode, cardholderName, cpf } = data;
+app.post("/createCardToken", async (req, res) => {
+  const { cardNumber, expirationMonth, expirationYear, securityCode, cardholderName, cpf } = req.body || {};
   if (!cardNumber || !expirationMonth || !expirationYear || !securityCode) {
     return fail(res, "INVALID_ARGUMENT", "Dados do cartão incompletos");
   }
@@ -199,7 +192,6 @@ exports.createCardToken = functions.https.onRequest(async (req, res) => {
       security_code: securityCode,
       cardholder: { name: cardholderName || "Cliente", identification: { type: "CPF", number: cpf ? cpf.replace(/\D/g, "") : "00000000000" } },
     }, { headers: authHeaders() });
-    console.log("Card token FULL response:", JSON.stringify(r.data));
     if (!r.data?.id) return fail(res, "INTERNAL", "Falha ao criar token do cartão");
     const brandCode = r.data.bin_attributes?.brand?.code || "";
     const cardTypes = r.data.bin_attributes?.card_type || [];
@@ -219,66 +211,6 @@ exports.createCardToken = functions.https.onRequest(async (req, res) => {
   }
 });
 
-exports.mercadopagoWebhook = functions.https.onRequest(async (req, res) => {
-  if (req.method === "GET") return res.status(200).send("Webhook ativo");
-  try {
-    const xSig = req.headers["x-signature"] || "";
-    if (MP_WEBHOOK_SECRET && xSig) {
-      const valid = verifyWebhookSignature(xSig, req.body);
-      if (!valid) {
-        console.error("Webhook signature verification failed");
-        return res.status(401).send("Invalid signature");
-      }
-    }
-    const { action, data } = req.body;
-    if ((action === "payment.created" || action === "payment.updated") && data?.id) {
-      const r = await axios.get(`${MP_API}/payments/${data.id}`, { headers: authHeaders() });
-      const p = r.data;
-      const existing = await admin.firestore().collection("payments").where("mpId", "==", p.id).limit(1).get();
-      if (!existing.empty) {
-        await existing.docs[0].ref.update({ status: p.status, statusDetail: p.status_detail, mpId: p.id, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
-        console.log(`Payment ${p.id} updated to ${p.status}`);
-      } else if (p.external_reference) {
-        const byRef = await admin.firestore().collection("payments").where("externalReference", "==", p.external_reference).limit(1).get();
-        if (!byRef.empty) {
-          await byRef.docs[0].ref.update({ status: p.status, statusDetail: p.status_detail, mpId: p.id, paymentMethod: p.payment_method_id, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
-          console.log(`Payment ${p.id} updated by external_reference ${p.external_reference} to ${p.status}`);
-        } else {
-          await admin.firestore().collection("payments").add({
-            mpId: p.id, externalReference: p.external_reference, status: p.status, statusDetail: p.status_detail,
-            amount: p.transaction_amount, description: p.description || "",
-            paymentMethod: p.payment_method_id,
-            payer: { email: p.payer?.email, name: `${p.payer?.first_name || ""} ${p.payer?.last_name || ""}`.trim() },
-            paymentResponse: p, createdAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
-          console.log(`Payment ${p.id} created via webhook`);
-        }
-      } else {
-        await admin.firestore().collection("payments").add({
-          mpId: p.id, status: p.status, statusDetail: p.status_detail,
-          amount: p.transaction_amount, description: p.description || "",
-          paymentMethod: p.payment_method_id,
-          payer: { email: p.payer?.email, name: `${p.payer?.first_name || ""} ${p.payer?.last_name || ""}`.trim() },
-          paymentResponse: p, createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
-        console.log(`Payment ${p.id} created via webhook`);
-      }
-    }
-    if (action === "payment.refunded" && data?.id) {
-      const existing = await admin.firestore().collection("payments").where("mpId", "==", data.id).limit(1).get();
-      if (!existing.empty) {
-        const r = await axios.get(`${MP_API}/payments/${data.id}`, { headers: authHeaders() });
-        await existing.docs[0].ref.update({ status: r.data.status, statusDetail: r.data.status_detail, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
-        console.log(`Payment ${data.id} refunded`);
-      }
-    }
-    res.status(200).send("OK");
-  } catch (e) {
-    console.error("Webhook error:", e);
-    res.status(200).send("OK");
-  }
-});
-
 function verifyWebhookSignature(xSig, body) {
   try {
     const pairs = xSig.split(",").reduce((a, p) => {
@@ -293,10 +225,64 @@ function verifyWebhookSignature(xSig, body) {
   } catch { return false; }
 }
 
-exports.refundPayment = functions.https.onRequest(async (req, res) => {
-  if (req.method === "OPTIONS") return res.status(204).send("");
-  const data = await getBody(req);
-  const { paymentId, amount } = data;
+app.get("/mercadopagoWebhook", (req, res) => res.status(200).send("Webhook ativo"));
+
+app.post("/mercadopagoWebhook", async (req, res) => {
+  try {
+    const xSig = req.headers["x-signature"] || "";
+    if (MP_WEBHOOK_SECRET && xSig) {
+      const valid = verifyWebhookSignature(xSig, req.body);
+      if (!valid) {
+        console.error("Webhook signature verification failed");
+        return res.status(401).send("Invalid signature");
+      }
+    }
+    const { action, data } = req.body || {};
+    if ((action === "payment.created" || action === "payment.updated") && data?.id) {
+      const r = await axios.get(`${MP_API}/payments/${data.id}`, { headers: authHeaders() });
+      const p = r.data;
+      const existing = await admin.firestore().collection("payments").where("mpId", "==", p.id).limit(1).get();
+      if (!existing.empty) {
+        await existing.docs[0].ref.update({ status: p.status, statusDetail: p.status_detail, mpId: p.id, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+      } else if (p.external_reference) {
+        const byRef = await admin.firestore().collection("payments").where("externalReference", "==", p.external_reference).limit(1).get();
+        if (!byRef.empty) {
+          await byRef.docs[0].ref.update({ status: p.status, statusDetail: p.status_detail, mpId: p.id, paymentMethod: p.payment_method_id, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+        } else {
+          await admin.firestore().collection("payments").add({
+            mpId: p.id, externalReference: p.external_reference, status: p.status, statusDetail: p.status_detail,
+            amount: p.transaction_amount, description: p.description || "",
+            paymentMethod: p.payment_method_id,
+            payer: { email: p.payer?.email, name: `${p.payer?.first_name || ""} ${p.payer?.last_name || ""}`.trim() },
+            paymentResponse: p, createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+        }
+      } else {
+        await admin.firestore().collection("payments").add({
+          mpId: p.id, status: p.status, statusDetail: p.status_detail,
+          amount: p.transaction_amount, description: p.description || "",
+          paymentMethod: p.payment_method_id,
+          payer: { email: p.payer?.email, name: `${p.payer?.first_name || ""} ${p.payer?.last_name || ""}`.trim() },
+          paymentResponse: p, createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+      }
+    }
+    if (action === "payment.refunded" && data?.id) {
+      const existing = await admin.firestore().collection("payments").where("mpId", "==", data.id).limit(1).get();
+      if (!existing.empty) {
+        const r = await axios.get(`${MP_API}/payments/${data.id}`, { headers: authHeaders() });
+        await existing.docs[0].ref.update({ status: r.data.status, statusDetail: r.data.status_detail, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+      }
+    }
+    res.status(200).send("OK");
+  } catch (e) {
+    console.error("Webhook error:", e);
+    res.status(200).send("OK");
+  }
+});
+
+app.post("/refundPayment", async (req, res) => {
+  const { paymentId, amount } = req.body || {};
   if (!paymentId) return fail(res, "INVALID_ARGUMENT", "paymentId é obrigatório");
   try {
     const body = amount ? { amount: Number(amount) } : {};
@@ -313,10 +299,8 @@ exports.refundPayment = functions.https.onRequest(async (req, res) => {
   }
 });
 
-exports.getInstallments = functions.https.onRequest(async (req, res) => {
-  if (req.method === "OPTIONS") return res.status(204).send("");
-  const data = await getBody(req);
-  const { paymentMethodId, amount, issuerId } = data;
+app.post("/getInstallments", async (req, res) => {
+  const { paymentMethodId, amount, issuerId } = req.body || {};
   if (!paymentMethodId || !amount) return fail(res, "INVALID_ARGUMENT", "paymentMethodId e amount obrigatórios");
   try {
     const params = { payment_method_id: paymentMethodId, amount: Number(amount), locale: "pt-BR" };
@@ -335,10 +319,8 @@ exports.getInstallments = functions.https.onRequest(async (req, res) => {
   }
 });
 
-exports.createCustomer = functions.https.onRequest(async (req, res) => {
-  if (req.method === "OPTIONS") return res.status(204).send("");
-  const d = await getBody(req);
-  const { email, name, cpf, cardToken } = d;
+app.post("/createCustomer", async (req, res) => {
+  const { email, name, cpf, cardToken } = req.body || {};
   if (!email || !name || !cpf) return fail(res, "INVALID_ARGUMENT", "email, name e cpf obrigatórios");
   const p = name.split(" "), fn = p[0] || "Cliente", ln = p.slice(1).join(" ") || fn;
   try {
@@ -364,10 +346,8 @@ exports.createCustomer = functions.https.onRequest(async (req, res) => {
   }
 });
 
-exports.listCustomerCards = functions.https.onRequest(async (req, res) => {
-  if (req.method === "OPTIONS") return res.status(204).send("");
-  const data = await getBody(req);
-  const { customerId } = data;
+app.post("/listCustomerCards", async (req, res) => {
+  const { customerId } = req.body || {};
   if (!customerId) return fail(res, "INVALID_ARGUMENT", "customerId é obrigatório");
   try {
     const r = await axios.get(`${MP_API}/customers/${customerId}/cards`, { headers: authHeaders() });
@@ -385,10 +365,8 @@ exports.listCustomerCards = functions.https.onRequest(async (req, res) => {
   }
 });
 
-exports.createPreference = functions.https.onRequest(async (req, res) => {
-  if (req.method === "OPTIONS") return res.status(204).send("");
-  const data = await getBody(req);
-  const { amount, description, payerInfo, address } = data;
+app.post("/createPreference", async (req, res) => {
+  const { amount, description, payerInfo, address } = req.body || {};
   if (!amount || !payerInfo?.email) return fail(res, "INVALID_ARGUMENT", "Dados incompletos");
   const txAmount = Math.round(Number(amount) * 100) / 100;
   const extRef = `order_${Date.now()}`;
@@ -423,10 +401,8 @@ exports.createPreference = functions.https.onRequest(async (req, res) => {
   }
 });
 
-exports.verifyPaymentByRef = functions.https.onRequest(async (req, res) => {
-  if (req.method === "OPTIONS") return res.status(204).send("");
-  const data = await getBody(req);
-  const { externalReference } = data;
+app.post("/verifyPaymentByRef", async (req, res) => {
+  const { externalReference } = req.body || {};
   if (!externalReference) return fail(res, "INVALID_ARGUMENT", "externalReference obrigatório");
   try {
     const snap = await admin.firestore().collection("payments")
@@ -479,3 +455,8 @@ exports.verifyPaymentByRef = functions.https.onRequest(async (req, res) => {
     fail(res, "INTERNAL", "Erro ao verificar pagamento");
   }
 });
+
+app.get("/", (req, res) => res.status(200).send("VidaPark API no ar"));
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));

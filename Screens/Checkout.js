@@ -52,7 +52,7 @@ export default function Checkout({ navigation, route }) {
   const taxaEntrega = route?.params?.taxaEntrega || 5;
   const totalGeral = route?.params?.totalGeral || totalCombo + taxaEntrega;
 
-  // Endereço agora vem do Firestore (users/{uid}/addresses),
+  // Endereço vem do Firestore (users/{uid}/addresses),
   // priorizando o que está marcado como "selected" na tela Addresses.
   const [endereco, setEndereco] = useState(null);
   const [carregandoEndereco, setCarregandoEndereco] = useState(true);
@@ -232,9 +232,11 @@ export default function Checkout({ navigation, route }) {
           onPress={confirmarPedido}
           disabled={enviando}
         >
-          <Text style={styles.confirmarButtonText}>
-            {enviando ? "PROCESSANDO..." : "CONFIRMAR PEDIDO"}
-          </Text>
+          {enviando ? (
+            <ActivityIndicator size="small" color={COLORS.branco} />
+          ) : (
+            <Text style={styles.confirmarButtonText}>CONFIRMAR PEDIDO</Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>

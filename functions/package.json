@@ -1,5 +1,5 @@
 {
-  "name": "bellaplus-payments",
+  "name": "VidaPark-payments",
   "version": "1.0.0",
   "description": "Firebase Cloud Functions for Mercado Pago payments",
   "main": "index.js",
