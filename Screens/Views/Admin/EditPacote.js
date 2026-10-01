@@ -1,4 +1,4 @@
-import {View,  Text,  TextInput,  StyleSheet,  Image,  Alert,  ScrollView,   Switch,} from "react-native";
+import { View, Text, TextInput, StyleSheet, Image, Alert, ScrollView, Switch, } from "react-native";
 import { Button } from "react-native-paper";
 import { db } from "../../../Firebase/firebaseConfig";
 import { useState } from "react";
@@ -6,7 +6,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import * as ImagePicker from "expo-image-picker";
 
 export default function EditPacote({ navigation, route }) {
-    const { pacote, aoSalvar } = route.params;
+    const { pacote } = route.params;
 
     const [nome, setNome] = useState(pacote.nome || "");
 
@@ -80,8 +80,8 @@ export default function EditPacote({ navigation, route }) {
     const [imagem, setImagem] =
         useState(
             pacote.imagem ||
-                pacote.imagens?.[0] ||
-                null
+            pacote.imagens?.[0] ||
+            null
         );
 
     // ─────────────────────────────────────────────
@@ -270,15 +270,7 @@ export default function EditPacote({ navigation, route }) {
                 [
                     {
                         text: "OK",
-                        onPress: () => {
-                            navigation.goBack();
-
-                            if (aoSalvar) {
-                                setTimeout(() => {
-                                    aoSalvar();
-                                }, 100);
-                            }
-                        },
+                        onPress: () => navigation.goBack(),
                     },
                 ]
             );
@@ -291,7 +283,7 @@ export default function EditPacote({ navigation, route }) {
             Alert.alert(
                 "Erro",
                 error.message ||
-                    "Não foi possível atualizar o pacote."
+                "Não foi possível atualizar o pacote."
             );
         }
     };

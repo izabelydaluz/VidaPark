@@ -1,28 +1,10 @@
 
-import React, { useState, useEffect, useMemo } from "react";
-
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Alert,
-  TouchableOpacity,
-  Image,
-  TextInput,
-  ActivityIndicator,
-} from "react-native";
-
+import React, { useState, useMemo, useCallback } from "react";
+import {View,Text,StyleSheet,FlatList,Alert,TouchableOpacity,Image,TextInput,ActivityIndicator} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
 import { db } from "../../../Firebase/firebaseConfig";
-
-import {
-  collection,
-  getDocs,
-  deleteDoc,
-  doc,
-} from "firebase/firestore";
+import {collection,getDocs,deleteDoc,doc} from "firebase/firestore";
+import { useFocusEffect } from "@react-navigation/native";
 
 const COLORS = {
   fundo: "#181830",
@@ -79,10 +61,13 @@ export default function GerenciarPacotes({ navigation }) {
     }
   }
 
-  useEffect(() => {
-    carregarPacotes();
-  }, []);
-
+  //Roda toda vez que a tela ganha foco
+  useFocusEffect (
+    useCallback(() => {
+      carregarPacotes();
+    }, [])
+  );
+  
   // =========================================================
   // EXCLUIR PACOTE
   // =========================================================
@@ -132,10 +117,7 @@ export default function GerenciarPacotes({ navigation }) {
   // =========================================================
 
   function editarPacote(pacote) {
-    navigation.navigate("EditPacote", {
-      pacote,
-      aoSalvar: carregarPacotes,
-    });
+    navigation.navigate("EditPacote", { pacote });
   }
 
   // =========================================================
