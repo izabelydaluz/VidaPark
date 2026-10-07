@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator, Alert, TextInput,} from "react-native";
+import {View,Text,FlatList,TouchableOpacity,Image,StyleSheet,ActivityIndicator,Alert,TextInput} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { collection, getDocs } from "firebase/firestore";
 import { db as database } from "../../../Firebase/firebaseConfig";
@@ -20,8 +20,6 @@ const COLORS = {
   amareloTexto: "#9A7B1E",
 };
 
-const MINIMO_UNIDADES = 50;
-
 export default function MonteSeuCombo({ route, navigation }) {
   const { theme } = useTheme();
 
@@ -35,9 +33,7 @@ export default function MonteSeuCombo({ route, navigation }) {
     try {
       setLoading(true);
 
-      const querySnapshot = await getDocs(
-        collection(database, "salgados")
-      );
+      const querySnapshot = await getDocs(collection(database, "salgados"));
 
       const lista = [];
 
@@ -60,78 +56,73 @@ export default function MonteSeuCombo({ route, navigation }) {
     carregarSalgados();
   }, []);
 
-
   function alterarQuantidade(produtoId, delta) {
-  setQuantidades((prev) => {
-    const atual = prev[produtoId] || 0;
+    setQuantidades((prev) => {
+      const atual = prev[produtoId] || 0;
 
-    const totalAtual = Object.values(prev).reduce(
-      (soma, qtd) => soma + qtd,
-      0
-    );
-
-    if (delta > 0 && limite && totalAtual >= limite) {
-      Alert.alert(
-        "Limite atingido",
-        `O Combo ${tamanho} permite até ${limite} salgados.`
+      const totalAtual = Object.values(prev).reduce(
+        (soma, qtd) => soma + qtd,
+        0
       );
 
-      return prev;
-    }
+      if (delta > 0 && limite && totalAtual >= limite) {
+        Alert.alert(
+          "Limite atingido",
+          `O Combo ${tamanho} permite até ${limite} salgados.`
+        );
 
-    const nova = Math.max(0, atual + delta);
+        return prev;
+      }
 
-    return {
-      ...prev,
-      [produtoId]: nova,
-    };
-  });
-}
+      const nova = Math.max(0, atual + delta);
 
-
- function definirQuantidade(produtoId, textoDigitado) {
-  if (textoDigitado === "") {
-    setQuantidades((prev) => ({
-      ...prev,
-      [produtoId]: 0,
-    }));
-    return;
+      return {
+        ...prev,
+        [produtoId]: nova,
+      };
+    });
   }
 
-  const somenteNumeros = textoDigitado.replace(/[^0-9]/g, "");
-  const valor = parseInt(somenteNumeros, 10);
+  function definirQuantidade(produtoId, textoDigitado) {
+    if (textoDigitado === "") {
+      setQuantidades((prev) => ({
+        ...prev,
+        [produtoId]: 0,
+      }));
+      return;
+    }
 
-  setQuantidades((prev) => {
+    const somenteNumeros = textoDigitado.replace(/[^0-9]/g, "");
+    const valor = parseInt(somenteNumeros, 10);
 
-    const totalSemProduto = Object.entries(prev).reduce(
-      (soma, [id, qtd]) => {
-        if (id === produtoId) return soma;
-        return soma + qtd;
-      },
-      0
-    );
+    setQuantidades((prev) => {
+      const totalSemProduto = Object.entries(prev).reduce(
+        (soma, [id, qtd]) => {
+          if (id === produtoId) return soma;
+          return soma + qtd;
+        },
+        0
+      );
 
+      const quantidadeDisponivel = Math.max(
+        0,
+        (limite || 0) - totalSemProduto
+      );
 
-    const quantidadeDisponivel = Math.max(
-      0,
-      (limite || 0) - totalSemProduto
-    );
+      const quantidadeFinal = Math.min(
+        isNaN(valor) ? 0 : Math.max(0, valor),
+        quantidadeDisponivel
+      );
 
+      return {
+        ...prev,
+        [produtoId]: quantidadeFinal,
+      };
+    });
+  }
 
-    const quantidadeFinal = Math.min(
-      isNaN(valor) ? 0 : Math.max(0, valor),
-      quantidadeDisponivel
-    );
-
-    return {
-      ...prev,
-      [produtoId]: quantidadeFinal,
-    };
-  });
-}
   function precoUnitario(item) {
-    const valor =
-      item.preco ?? item.valor ?? 0;
+    const valor = item.preco ?? item.valor ?? 0;
 
     return typeof valor === "string"
       ? parseFloat(valor.replace(",", "."))
@@ -145,11 +136,7 @@ export default function MonteSeuCombo({ route, navigation }) {
   }
 
   const totalUnidades = useMemo(
-    () =>
-      Object.values(quantidades).reduce(
-        (soma, qtd) => soma + qtd,
-        0
-      ),
+    () => Object.values(quantidades).reduce((soma, qtd) => soma + qtd, 0),
     [quantidades]
   );
 
@@ -157,78 +144,60 @@ export default function MonteSeuCombo({ route, navigation }) {
     return produtos.reduce((soma, item) => {
       const qtd = quantidades[item.id] || 0;
 
-      return (
-        soma +
-        qtd * precoUnitario(item)
-      );
+      return soma + qtd * precoUnitario(item);
     }, 0);
   }, [produtos, quantidades]);
 
+  const progresso = limite ? Math.min(totalUnidades / limite, 1) : 0;
 
+  const atingiuLimite = limite ? totalUnidades >= limite : false;
 
-  const progresso = limite
-    ? Math.min(totalUnidades / limite, 1)
-    : 0;
+  const comboCompleto = limite ? totalUnidades === limite : false;
+  const faltam = limite ? Math.max(0, limite - totalUnidades) : 0;
 
-  const atingiuLimite = limite
-    ? totalUnidades >= limite
-    : false;
+  function adicionarAoCarrinho() {
+    if (!comboCompleto) {
+      Alert.alert(
+        "Combo incompleto",
+        `O Combo ${tamanho} precisa ter exatamente ${limite} salgados. Faltam ${faltam}.`
+      );
+      return;
+    }
 
-  
+    const itensSelecionados = produtos
+      .filter((item) => (quantidades[item.id] || 0) > 0)
+      .map((item) => ({
+        id: item.id,
+        nome: item.nome,
+        quantidade: quantidades[item.id],
+        precoUnitario: precoUnitario(item),
+      }));
 
-
-
-    function adicionarAoCarrinho() {
-
-  if (limite && totalUnidades > limite) {
-    Alert.alert(
-      "Limite excedido",
-      `O Combo ${tamanho} permite no máximo ${limite} salgados.`
-    );
-    return;
+    navigation.navigate("Carrinho", {
+      combo: itensSelecionados,
+      tamanho: tamanho,
+      limite: limite,
+      total: totalValor,
+    });
   }
-
-  if (totalUnidades === 0) {
-    Alert.alert(
-      "Combo vazio",
-      "Escolha pelo menos um salgado para continuar."
-    );
-    return;
-  }
-
-  const itensSelecionados = produtos
-    .filter(
-      (item) => (quantidades[item.id] || 0) > 0
-    )
-    .map((item) => ({
-      id: item.id,
-      nome: item.nome,
-      quantidade: quantidades[item.id],
-      precoUnitario: precoUnitario(item),
-    }));
-
-  navigation.navigate("Carrinho", {
-    combo: itensSelecionados,
-    tamanho: tamanho,
-    limite: limite,
-    total: totalValor,
-  });
-}
-
 
   return (
-    <View style={[ styles.container, {   backgroundColor: theme.background, }, ]}>
-      <View style={[  styles.header, { backgroundColor: theme.primary, }, ]} >
-        <TouchableOpacity  onPress={() => navigation.goBack()}  style={styles.iconButton} >
-          <Ionicons
-            name="chevron-back"
-            size={22}
-            color={theme.text}
-          />
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.primary }]}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.iconButton}
+        >
+          <Ionicons name="chevron-back" size={22} color={theme.text} />
         </TouchableOpacity>
 
-        <Text style={[ styles.headerTitle, {  color: theme.surface, }, ]} >  Monte seu combo </Text>
-         <TouchableOpacity style={styles.iconButton} onPress={() =>
+        <Text style={[styles.headerTitle, { color: theme.surface }]}>
+          Monte seu combo
+        </Text>
+
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() =>
             Alert.alert(
               "Monte seu combo",
               `Escolha os sabores que quiser até atingir o limite de ${limite} unidades.`
@@ -243,31 +212,47 @@ export default function MonteSeuCombo({ route, navigation }) {
         </TouchableOpacity>
       </View>
 
-  
-      <View style={[ styles.avisoBox, {backgroundColor: theme.lightPink,  borderColor: theme.accent, }, ]} >
-        <Text style={[ styles.avisoTitulo, {  color: theme.primary, }, ]} >Combo {tamanho} — até {limite} unidades</Text>
-        <Text style={[ styles.avisoSubtitulo,  {color: theme.textSecondary, }, ]} >  Escolha entre os sabores abaixo </Text>
+      <View
+        style={[
+          styles.avisoBox,
+          { backgroundColor: theme.lightPink, borderColor: theme.accent },
+        ]}
+      >
+        <Text style={[styles.avisoTitulo, { color: theme.primary }]}>
+          Combo {tamanho} — até {limite} unidades
+        </Text>
+        <Text style={[styles.avisoSubtitulo, { color: theme.textSecondary }]}>
+          Escolha entre os sabores abaixo
+        </Text>
       </View>
 
       <View style={styles.progressoWrapper}>
-        <Text style={[ styles.progressoLabel,  {  color: theme.textSecondary,  }, ]} > Você selecionou{" "}
-          <Text style={{  fontWeight: "700", color: theme.primary, }}>  {totalUnidades} / {limite} </Text>
+        <Text style={[styles.progressoLabel, { color: theme.textSecondary }]}>
+          Você selecionou{" "}
+          <Text style={{ fontWeight: "700", color: theme.primary }}>
+            {totalUnidades} / {limite}
+          </Text>
         </Text>
-        <View style={[ styles.progressoBarraFundo, { backgroundColor: theme.border,}, ]}>
-          <View style={[ styles.progressoBarraPreenchida, {
+        <View
+          style={[styles.progressoBarraFundo, { backgroundColor: theme.border }]}
+        >
+          <View
+            style={[
+              styles.progressoBarraPreenchida,
+              {
                 width: `${progresso * 100}%`,
                 backgroundColor: atingiuLimite
                   ? theme.accent
-                  : theme.lightPink, }, ]} />
+                  : theme.lightPink,
+              },
+            ]}
+          />
         </View>
       </View>
-  
+
       {loading ? (
         <View style={styles.centerBox}>
-          <ActivityIndicator
-            size="large"
-            color={theme.accent}
-          />
+          <ActivityIndicator size="large" color={theme.accent} />
         </View>
       ) : (
         <FlatList
@@ -277,16 +262,34 @@ export default function MonteSeuCombo({ route, navigation }) {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           renderItem={({ item }) => {
-            const qtd =
-              quantidades[item.id] || 0;
+            const qtd = quantidades[item.id] || 0;
 
             return (
-              <View style={[  styles.itemCard, { backgroundColor: theme.surface,  shadowColor: theme.cardShadow,  }, ]}>
-
+              <View
+                style={[
+                  styles.itemCard,
+                  {
+                    backgroundColor: theme.surface,
+                    shadowColor: theme.cardShadow,
+                  },
+                ]}
+              >
                 {item.imagem ? (
-                  <Image source={{ uri: item.imagem }}style={[ styles.itemImage,  {backgroundColor: theme.border,},  ]} />
+                  <Image
+                    source={{ uri: item.imagem }}
+                    style={[
+                      styles.itemImage,
+                      { backgroundColor: theme.border },
+                    ]}
+                  />
                 ) : (
-                  <View style={[ styles.itemImage,styles.itemImagePlaceholder, {  backgroundColor:  theme.border,}, ]} >
+                  <View
+                    style={[
+                      styles.itemImage,
+                      styles.itemImagePlaceholder,
+                      { backgroundColor: theme.border },
+                    ]}
+                  >
                     <Ionicons
                       name="fast-food-outline"
                       size={20}
@@ -296,53 +299,46 @@ export default function MonteSeuCombo({ route, navigation }) {
                 )}
 
                 <View style={styles.itemInfo}>
-                  <Text style={[ styles.itemNome,  {  color: theme.primary, }, ]}  > {item.nome} </Text>
+                  <Text style={[styles.itemNome, { color: theme.primary }]}>
+                    {item.nome}
+                  </Text>
 
-                  <Text  style={[ styles.itemPreco,  {  color: theme.darkPink,}, ]} >
-                    {formatarPreco(
-                      precoUnitario(item) )}  
+                  <Text style={[styles.itemPreco, { color: theme.darkPink }]}>
+                    {formatarPreco(precoUnitario(item))}
                   </Text>
                 </View>
 
-    
                 <View style={styles.stepper}>
-          
-                  <TouchableOpacity style={[styles.stepperButton, {
+                  <TouchableOpacity
+                    style={[
+                      styles.stepperButton,
+                      {
                         backgroundColor:
-                          qtd === 0
-                            ? theme.border
-                            : theme.accent,
+                          qtd === 0 ? theme.border : theme.accent,
                       },
-                    ]}  onPress={() => alterarQuantidade(
-                        item.id,
-                        -1
-                      )
-                    } disabled={qtd === 0}>
+                    ]}
+                    onPress={() => alterarQuantidade(item.id, -1)}
+                    disabled={qtd === 0}
+                  >
                     <Ionicons
                       name="remove"
                       size={16}
-                      color={
-                        qtd === 0
-                          ? theme.textMuted
-                          : theme.surface
-                      }
+                      color={qtd === 0 ? theme.textMuted : theme.surface}
                     />
                   </TouchableOpacity>
 
-              
-                  <TextInput style={[  styles.stepperInput, {
+                  <TextInput
+                    style={[
+                      styles.stepperInput,
+                      {
                         color: theme.primary,
                         borderColor: theme.border,
-                        backgroundColor:
-                          theme.surface,
+                        backgroundColor: theme.surface,
                       },
                     ]}
                     value={String(qtd)}
                     onChangeText={(texto) =>
-                      definirQuantidade(
-                        item.id,
-                        texto
-                      )
+                      definirQuantidade(item.id, texto)
                     }
                     keyboardType="number-pad"
                     textAlign="center"
@@ -350,17 +346,22 @@ export default function MonteSeuCombo({ route, navigation }) {
                     maxLength={4}
                   />
 
-                  <TouchableOpacity  style={[ styles.stepperButton, { backgroundColor: atingiuLimite
-                            ? theme.border
-                            : theme.accent, }, ]} onPress={() => alterarQuantidade( item.id, 1 ) } disabled={atingiuLimite} >
+                  <TouchableOpacity
+                    style={[
+                      styles.stepperButton,
+                      {
+                        backgroundColor: atingiuLimite
+                          ? theme.border
+                          : theme.accent,
+                      },
+                    ]}
+                    onPress={() => alterarQuantidade(item.id, 1)}
+                    disabled={atingiuLimite}
+                  >
                     <Ionicons
                       name="add"
                       size={16}
-                      color={
-                        atingiuLimite
-                          ? theme.textMuted
-                          : theme.surface
-                      }
+                      color={atingiuLimite ? theme.textMuted : theme.surface}
                     />
                   </TouchableOpacity>
                 </View>
@@ -370,24 +371,37 @@ export default function MonteSeuCombo({ route, navigation }) {
         />
       )}
 
-      <View style={[styles.footer, {  backgroundColor: theme.surface, borderTopColor: theme.border, }, ]} >
+      <View
+        style={[
+          styles.footer,
+          { backgroundColor: theme.surface, borderTopColor: theme.border },
+        ]}
+      >
         <View style={styles.footerResumo}>
-          <Text style={[  styles.footerUnidades, { color: theme.textSecondary, },]}> {totalUnidades} / {limite} unidades </Text>
+          <Text style={[styles.footerUnidades, { color: theme.textSecondary }]}>
+            {totalUnidades} / {limite} unidades
+          </Text>
 
-          <Text style={[ styles.footerTotal, { color: theme.primary, }, ]}> {formatarPreco(totalValor)} </Text>
+          <Text style={[styles.footerTotal, { color: theme.primary }]}>
+            {formatarPreco(totalValor)}
+          </Text>
         </View>
 
-        <TouchableOpacity style={[ styles.addButton, {
-              backgroundColor:
-                totalUnidades === 0
-                  ? theme.lightPink
-                  : theme.accent,
+        <TouchableOpacity
+          style={[
+            styles.addButton,
+            {
+              backgroundColor: comboCompleto ? theme.accent : theme.lightPink,
             },
           ]}
           onPress={adicionarAoCarrinho}
-          disabled={totalUnidades === 0}
+          disabled={!comboCompleto}
         >
-          <Text style={[ styles.addButtonText,   { color: theme.surface, },  ]} > ADICIONAR AO CARRINHO </Text>
+          <Text style={[styles.addButtonText, { color: theme.surface }]}>
+            {comboCompleto
+              ? "ADICIONAR AO CARRINHO"
+              : `FALTAM ${faltam} SALGADOS`}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -398,7 +412,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-
 
   header: {
     paddingTop: 55,
@@ -421,8 +434,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
-
 
   avisoBox: {
     marginHorizontal: 16,
@@ -511,6 +522,7 @@ const styles = StyleSheet.create({
     marginTop: 3,
     fontWeight: "600",
   },
+
   stepper: {
     flexDirection: "row",
     alignItems: "center",
