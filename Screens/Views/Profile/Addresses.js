@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, TextInput, M
 import { Ionicons } from "@expo/vector-icons";
 import * as FileSystem from "expo-file-system/legacy";
 import { useTheme } from "../../../context/ThemeContext";
+import * as Location from "expo-location";
+import { geocodificar, textoBusca } from "../Profile/taxaEntrega";
 
 // ======================================================
 // IMPORTS DO FIREBASE (ADICIONADOS)
@@ -35,6 +37,8 @@ export default function Addresses({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [gps, setGps] = useState(null); // { latitude, longitude, texto }
+const [buscandoGps, setBuscandoGps] = useState(false);
 
   const [form, setForm] = useState({
     label: "",
@@ -133,6 +137,11 @@ export default function Addresses({ navigation }) {
 
   function openForm(address = null) {
     if (address) {
+      setGps(
+  address.latitude != null
+    ? { latitude: address.latitude, longitude: address.longitude, texto: textoBusca(address) }
+    : null
+);
       setEditingId(address.id);
 
       setForm({
@@ -146,6 +155,7 @@ export default function Addresses({ navigation }) {
         zipCode: address.zipCode || "",
       });
     } else {
+      setGps(null);
       setEditingId(null);
 
       setForm({
@@ -217,6 +227,44 @@ export default function Addresses({ navigation }) {
       );
     }
   }
+  async function usarMinhaLocalizacao() {
+  try {
+    setBuscandoGps(true);
+
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permissão negada", "Ative a localização para usar este recurso.");
+      return;
+    }
+
+    const pos = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.High,
+    });
+    const { latitude, longitude } = pos.coords;
+
+    const [end] = await Location.reverseGeocodeAsync({ latitude, longitude });
+
+    const novo = {
+      ...form,
+      street: end?.street || form.street,
+      number: end?.streetNumber || form.number,
+      neighborhood: end?.district || end?.subregion || form.neighborhood,
+      city: end?.city || form.city,
+      state: end?.region && end.region.length === 2 ? end.region.toUpperCase() : form.state,
+      zipCode: end?.postalCode || form.zipCode,
+    };
+
+    setForm(novo);
+    setGps({ latitude, longitude, texto: textoBusca(novo) });
+
+    Alert.alert("Localização encontrada", "Confira os dados e complete o que estiver faltando.");
+  } catch (e) {
+    console.log("Erro GPS:", e);
+    Alert.alert("Erro", "Não foi possível obter sua localização.");
+  } finally {
+    setBuscandoGps(false);
+  }
+}
 
   // ======================================================
   // SALVAR ENDEREÇO
@@ -246,6 +294,18 @@ export default function Addresses({ navigation }) {
     }
 
     try {
+      const coords =
+  gps && gps.texto === textoBusca(form)
+    ? { latitude: gps.latitude, longitude: gps.longitude }
+    : await geocodificar(form);
+
+if (!coords) {
+  Alert.alert(
+    "Endereço não encontrado",
+    'Confira rua, número e cidade, ou use o botão "Usar minha localização".'
+  );
+  return;
+}
       const now = new Date().toISOString();
 
       const isFirstAddress =
@@ -258,6 +318,8 @@ export default function Addresses({ navigation }) {
         : null;
 
       const addressData = {
+        latitude: coords.latitude,
+        longitude: coords.longitude,
         ...form,
 
         label:
@@ -727,9 +789,19 @@ export default function Addresses({ navigation }) {
               },
             ]}
           >
-            <View
-              style={styles.modalHeader}
-            >
+            <View style={styles.modalHeader}  >
+              <TouchableOpacity style={[styles.gpsButton, { borderColor: theme.primary }]} onPress={usarMinhaLocalizacao}disabled={buscandoGps}>
+  {buscandoGps ? (
+    <ActivityIndicator size="small" color={theme.primary} />
+  ) : (
+    <>
+      <Ionicons name="navigate-outline" size={18} color={theme.primary} />
+      <Text style={{ color: theme.primary, fontWeight: "700" }}>
+        Usar minha localização
+      </Text>
+    </>
+  )}
+</TouchableOpacity>
               <Text
                 style={[
                   styles.modalTitle,
@@ -1051,7 +1123,16 @@ const styles = StyleSheet.create({
 
     elevation: 2,
   },
-
+gpsButton: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 8,
+  borderWidth: 1,
+  borderRadius: 12,
+  padding: 12,
+  marginBottom: 12,
+},
   addressHeader: {
     flexDirection: "row",
     justifyContent: "space-between",

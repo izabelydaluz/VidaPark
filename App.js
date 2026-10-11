@@ -192,6 +192,7 @@ function AppContent() {
           headerShown: false
         }} />
 
+
         <Stack.Screen name="Pacotes" component={Pacotes} options={{
           headerShown: false
         }} />

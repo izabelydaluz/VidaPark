@@ -3,26 +3,28 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../../context/ThemeContext";
 
-const TAXA_ENTREGA = 5.0;
+
+
 
 export default function Carrinho({ navigation, route }) {
   const combo = route?.params?.combo || [];
   const totalCombo = route?.params?.total || 0;
+  const tamanho = route?.params?.tamanho;
+  const limite = route?.params?.limite;
 
   const { theme } = useTheme();
 
   const totalUnidades = useMemo(
-    () =>
-      combo.reduce(
-        (soma, item) => soma + item.quantidade,
-        0
-      ),
+    () => combo.reduce((soma, item) => soma + item.quantidade, 0),
     [combo]
   );
 
-  const totalGeral =
-    totalCombo +
-    (combo.length > 0 ? TAXA_ENTREGA : 0);
+  const totalGeral = totalCombo;   // ← só esta, uma vez
+
+  function formatarPreco(valor) {
+    return `R$ ${Number(valor || 0).toFixed(2).replace(".", ",")}`;
+  }
+  
 
   function formatarPreco(valor) {
     return `R$ ${Number(valor || 0)
@@ -31,12 +33,7 @@ export default function Carrinho({ navigation, route }) {
   }
 
   function finalizarPedido() {
-    navigation.navigate("Checkout", {
-      combo,
-      totalCombo,
-      taxaEntrega: TAXA_ENTREGA,
-      totalGeral,
-    });
+    navigation.navigate("Checkout", { combo, totalCombo });
   }
 
   if (combo.length === 0) {
@@ -69,10 +66,16 @@ export default function Carrinho({ navigation, route }) {
 
           <Text  style={[   styles.emptySubtitle,  { color: theme.textSecondary }, ]} > Adicione itens para continuar seu pedido. </Text>
 
-          <TouchableOpacity style={[   styles.emptyButton,   { backgroundColor: theme.accent },]} onPress={() => navigation.navigate("Catalogo")}>
-            <Text style={[styles.emptyButtonText,  { color: theme.surface }, ]} >   VER CATÁLOGO
-            </Text>
-          </TouchableOpacity>
+          <TouchableOpacity style={styles.editarButton} onPress={() => navigation.navigate("MonteSeuCombo", {
+      tamanho: tamanho,
+      limite: limite,
+      comboInicial: combo, // lista [{ id, nome, quantidade, precoUnitario }]
+      editando: true,
+    })
+  }
+>
+  <Text style={styles.editarButtonText}>Editar combo</Text>
+</TouchableOpacity>
         </View>
       </View>
     );
@@ -110,9 +113,18 @@ export default function Carrinho({ navigation, route }) {
                 </Text>
               </View>
 
-              <TouchableOpacity style={[ styles.editarButton, { borderColor: theme.accent }, ]} onPress={() => navigation.navigate("Catalogo") }  >
-                <Text style={[ styles.editarButtonText,  { color: theme.accent },  ]} > Editar combo </Text>
-              </TouchableOpacity>
+              <TouchableOpacity style={[styles.editarButton, { borderColor: theme.accent }]} onPress={() => navigation.navigate("MonteSeuCombo", {
+      tamanho: tamanho,
+      limite: limite,
+      comboInicial: combo,
+      editando: true,
+    })
+  }
+>
+  <Text style={[styles.editarButtonText, { color: theme.accent }]}>
+    Editar combo
+  </Text>
+</TouchableOpacity>
             </View>
           </View>
         }
@@ -133,11 +145,11 @@ export default function Carrinho({ navigation, route }) {
           <View style={styles.resumoFinal}>
             <View style={styles.linhaValor}>
               <Text style={[ styles.linhaLabel, { color: theme.textSecondary },  ]} >  Taxa de entrega</Text>
-              <Text style={[ styles.linhaValorTexto,  { color: theme.textSecondary },]}> {formatarPreco(TAXA_ENTREGA)}</Text>
+              <Text style={[styles.linhaValorTexto, { color: theme.textSecondary }]}>Calculada no checkout </Text>
             </View>
 
             <View style={[styles.linhaValor,  styles.linhaTotal,  { borderTopColor: theme.border,  }, ]}>
-              <Text style={[styles.totalLabel,{ color: theme.primary },]} >Total </Text>
+              <Text style={[styles.totalLabel,{ color: theme.primary },]} >Subtotal </Text>
 
               <Text style={[   styles.totalValorTexto, { color: theme.primary }, ]} >  {formatarPreco(totalGeral)} </Text>
             </View>

@@ -23,11 +23,19 @@ const COLORS = {
 export default function MonteSeuCombo({ route, navigation }) {
   const { theme } = useTheme();
 
+ const { tamanho, limite, comboInicial, editando } = route?.params || {};
+
   const [produtos, setProdutos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [quantidades, setQuantidades] = useState({});
 
-  const { tamanho, limite } = route?.params || {};
+  // Se veio do carrinho, já começa com as quantidades escolhidas
+  const [quantidades, setQuantidades] = useState(() => {
+    const iniciais = {};
+    (comboInicial || []).forEach((item) => {
+      iniciais[item.id] = item.quantidade;
+    });
+    return iniciais;
+  });
 
   async function carregarSalgados() {
     try {
@@ -191,9 +199,7 @@ export default function MonteSeuCombo({ route, navigation }) {
           <Ionicons name="chevron-back" size={22} color={theme.text} />
         </TouchableOpacity>
 
-        <Text style={[styles.headerTitle, { color: theme.surface }]}>
-          Monte seu combo
-        </Text>
+        <Text style={[styles.headerTitle, { color: theme.surface }]}>{editando ? "Editar combo" : "Monte seu combo"}</Text>
 
         <TouchableOpacity
           style={styles.iconButton}
@@ -399,8 +405,10 @@ export default function MonteSeuCombo({ route, navigation }) {
         >
           <Text style={[styles.addButtonText, { color: theme.surface }]}>
             {comboCompleto
-              ? "ADICIONAR AO CARRINHO"
-              : `FALTAM ${faltam} SALGADOS`}
+          ? editando
+          ? "SALVAR ALTERAÇÕES"
+          : "ADICIONAR AO CARRINHO"
+          : `FALTAM ${faltam} SALGADOS`}
           </Text>
         </TouchableOpacity>
       </View>

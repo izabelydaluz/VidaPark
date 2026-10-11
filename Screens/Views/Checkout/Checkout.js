@@ -5,6 +5,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { auth, db } from "../../../Firebase/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 import { callFunction } from "../Checkout/mercadopago";
+import { geocodificar, calcularTaxa } from "../Profile/taxaEntrega";
 
 function addressesCollection(uid) {
   return collection(db, "users", uid, "addresses");
@@ -61,9 +62,15 @@ function contarUnidades(combo) {
 export default function Checkout({ navigation, route }) {
   // Dados que vieram do Carrinho
   const combo = route?.params?.combo || [];
-  const totalCombo = route?.params?.totalCombo || 0;
-  const taxaEntrega = route?.params?.taxaEntrega || 5;
-  const totalGeral = route?.params?.totalGeral || totalCombo + taxaEntrega;
+  const totalCombo = route?.params?.totalCombo || 0;   
+
+  const [taxaEntrega, setTaxaEntrega] = useState(null);
+  const [distanciaKm, setDistanciaKm] = useState(null);
+  const [calculandoTaxa, setCalculandoTaxa] = useState(false);
+
+  const totalGeral = totalCombo + (taxaEntrega || 0);   
+
+ 
 
   // Endereço vem do Firestore (users/{uid}/addresses),
   // priorizando o que está marcado como "selected" na tela Addresses.
@@ -75,9 +82,35 @@ export default function Checkout({ navigation, route }) {
   const [formaPagamento, setFormaPagamento] = useState("pix");
   const [enviando, setEnviando] = useState(false);
 
+
+  const calcularTaxaDoEndereco = useCallback(async (addr) => {
+  setTaxaEntrega(null);
+  setDistanciaKm(null);
+  if (!addr) return;
+
+  setCalculandoTaxa(true);
+  try {
+    // usa as coordenadas salvas; se o endereço é antigo e não tem, busca agora
+    const coords =
+      typeof addr.latitude === "number" && typeof addr.longitude === "number"
+        ? { latitude: addr.latitude, longitude: addr.longitude }
+        : await geocodificar(addr);
+
+    if (coords) {
+      const { taxa, km } = calcularTaxa(coords);
+      setTaxaEntrega(taxa);
+      setDistanciaKm(km);
+    }
+  } finally {
+    setCalculandoTaxa(false);
+  }
+}, []);
+
+
   const carregarEndereco = useCallback(async () => {
     try {
       setCarregandoEndereco(true);
+      calcularTaxaDoEndereco(marcado);
 
       const uid = auth.currentUser?.uid;
       if (!uid) {
@@ -100,7 +133,7 @@ export default function Checkout({ navigation, route }) {
     } finally {
       setCarregandoEndereco(false);
     }
-  }, []);
+  }, [calcularTaxaDoEndereco]);
 
   // Recarrega toda vez que a tela ganha foco — assim, ao voltar de
   // "Addresses" depois de trocar o endereço padrão, o Checkout já
@@ -117,6 +150,13 @@ export default function Checkout({ navigation, route }) {
 
   async function confirmarPedido() {
     if (!endereco) {
+      if (taxaEntrega === null) {
+  Alert.alert(
+    "Taxa de entrega",
+    "Não conseguimos calcular a taxa para este endereço. Confira o endereço e tente de novo."
+  );
+  return;
+}
       Alert.alert(
         "Endereço necessário",
         "Adicione um endereço de entrega antes de confirmar o pedido.",
@@ -258,6 +298,28 @@ export default function Checkout({ navigation, route }) {
           )}
         </View>
 
+<View style={styles.card}>
+  <Text style={styles.cardTitulo}>Resumo</Text>
+
+  <View style={styles.resumoLinha}>
+    <Text style={styles.resumoLabel}>Combo</Text>
+    <Text style={styles.resumoValor}>{formatarPreco(totalCombo)}</Text>
+  </View>
+
+  <View style={styles.resumoLinha}>
+    <Text style={styles.resumoLabel}>
+      Taxa de entrega
+      {taxaEntrega === null ? "Não calculada" : taxaEntrega === 0 ? "Grátis" : formatarPreco(taxaEntrega)}
+    </Text>
+    {calculandoTaxa ? (
+      <ActivityIndicator size="small" color={COLORS.rosaVidaPark} />
+    ) : (
+      <Text style={styles.resumoValor}>
+        {taxaEntrega === null ? "—" : taxaEntrega === 0 ? "Grátis" : formatarPreco(taxaEntrega)}
+      </Text>
+    )}
+  </View>
+</View>
         {/* Data e horário */}
         <View style={styles.card}>
           <Text style={styles.cardTitulo}>Data e horário</Text>
@@ -310,7 +372,7 @@ export default function Checkout({ navigation, route }) {
         <TouchableOpacity
           style={[styles.confirmarButton, enviando && { opacity: 0.7 }]}
           onPress={confirmarPedido}
-          disabled={enviando}
+          disabled={enviando || calculandoTaxa}
         >
           {enviando ? (
             <ActivityIndicator size="small" color={COLORS.branco} />
@@ -328,7 +390,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.branco,
   },
-
+resumoLinha: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginTop: 8,
+},
+resumoLabel: { fontSize: 13, color: COLORS.textoSecundario },
+resumoValor: { fontSize: 13, fontWeight: "700", color: COLORS.azulVidaPark },
   // Header
   header: {
     backgroundColor: COLORS.azulVidaPark,
