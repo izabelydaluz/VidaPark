@@ -121,7 +121,7 @@ export default function Home({ navigation, route }) {
           </ImageBackground>
         </TouchableOpacity>
 
-        <TouchableOpacity activeOpacity={0.85} style={styles.bannerCard} onPress={() => navigation.navigate("Catalogo")}>
+        <TouchableOpacity activeOpacity={0.85} style={styles.bannerCard} onPress={() => navigation.navigate("catalogoSalgados")}>
           <ImageBackground source={IMG_SALGADOS} style={styles.bannerImage}imageStyle={styles.bannerImageRadius}>
             <View style={[ styles.bannerIconBadge, { backgroundColor: theme.primary }, ]}>
               <Ionicons name="fast-food-outline" size={18} color={theme.surface} />

@@ -62,13 +62,14 @@ function TabNavigate() {
     >
 
 
-      <Tab.Screen name="Home" component={Home}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color }) => (
-            <Entypo name="home" size={20} color={color} />
-          )
-        }} />
+      <Tab.Screen name="Inicio" component={Home}
+  options={{
+    title: "Home",
+    headerShown: false,
+    tabBarIcon: ({ color }) => (
+      <Entypo name="home" size={20} color={color} />
+    )
+  }} />
 
         <Tab.Screen name="Galeria" component={Galeria}
         options={{
@@ -187,10 +188,9 @@ function AppContent() {
 
 
 
-        <Stack.Screen name="catalogo" component={TabNavigate} options={{
-          headerShown: false
-        }} />
-
+        <Stack.Screen name="catalogoSalgados" component={CatalogoSalgados} options={{
+  headerShown: false
+}} />
         <Stack.Screen name="TamanhoCombo" component={TamanhoCombo} options={{
           headerShown: false
         }} />
