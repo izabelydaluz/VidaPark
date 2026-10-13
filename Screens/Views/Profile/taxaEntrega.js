@@ -3,7 +3,7 @@ import * as Location from "expo-location";
 const LOJA = { latitude:  -28.4735, longitude:  -49.0215  };
 
 const VALOR_POR_KM = 3.0;  // exemplo: 5 km = R$ 15,00
-const KM_GRATIS = 100;     // até 100 km não paga
+const KM_GRATIS = 5;     // até 5 km não paga
 const TAXA_MINIMA = 0;
 
 export function textoBusca(a) {
