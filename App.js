@@ -37,6 +37,9 @@ import Checkout from "./Screens/Views/Checkout/Checkout";
 import MeusPedidos from "./Screens/MeusPedidos";
 import TamanhoCombo from "./Screens/TamanhoCombo";
 import Pacotes from "./Screens/Pacotes";
+import Galeria from "./Screens/Galeria";
+
+
  
 function TabNavigate() {
   const Tab = createBottomTabNavigator();
@@ -67,11 +70,11 @@ function TabNavigate() {
           )
         }} />
 
-        <Tab.Screen name="Catalogo" component={CatalogoSalgados}
+        <Tab.Screen name="Galeria" component={Galeria}
         options={{
           headerShown: false,
           tabBarIcon: ({ color }) => (
-            <Entypo name="shopping-bag" size={20} color={color} />
+            <Entypo name="images" size={20} color={color} />
             
           )
         }} />     
@@ -197,6 +200,10 @@ function AppContent() {
           headerShown: false
         }} />
         
+        <Stack.Screen name="Galeria" component={Galeria} options={{
+          headerShown: false
+        }} />
+
         <Stack.Screen name="MonteSeuCombo" component={MonteSeuCombo} options={{
           headerShown: false
         }} />

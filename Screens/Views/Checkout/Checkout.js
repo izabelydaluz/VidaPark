@@ -6,6 +6,7 @@ import { auth, db } from "../../../Firebase/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 import { callFunction } from "../Checkout/mercadopago";
 import { geocodificar, calcularTaxa } from "../Profile/taxaEntrega";
+import  { useEffect } from "react";
 
 function addressesCollection(uid) {
   return collection(db, "users", uid, "addresses");
@@ -83,66 +84,94 @@ export default function Checkout({ navigation, route }) {
   const [enviando, setEnviando] = useState(false);
 
 
-  const calcularTaxaDoEndereco = useCallback(async (addr) => {
-  setTaxaEntrega(null);
-  setDistanciaKm(null);
-  if (!addr) return;
 
-  setCalculandoTaxa(true);
-  try {
-    // usa as coordenadas salvas; se o endereço é antigo e não tem, busca agora
-    const coords =
-      typeof addr.latitude === "number" && typeof addr.longitude === "number"
-        ? { latitude: addr.latitude, longitude: addr.longitude }
-        : await geocodificar(addr);
 
-    if (coords) {
-      const { taxa, km } = calcularTaxa(coords);
-      setTaxaEntrega(taxa);
-      setDistanciaKm(km);
+  const [erroTaxa, setErroTaxa] = useState("");
+
+// 1) Carrega o endereço quando a tela ganha foco
+useFocusEffect(
+  useCallback(() => {
+    let ativo = true;
+
+    async function carregar() {
+      try {
+        setCarregandoEndereco(true);
+
+        const uid = auth.currentUser?.uid;
+        if (!uid) {
+          if (ativo) setEndereco(null);
+          return;
+        }
+
+        const snapshot = await getDocs(addressesCollection(uid));
+        const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+        const marcado = list.find((a) => a.selected) || list[0] || null;
+
+        if (ativo) setEndereco(marcado);
+      } catch (e) {
+        console.log("Erro ao carregar endereço no Checkout:", e);
+        if (ativo) setEndereco(null);
+      } finally {
+        if (ativo) setCarregandoEndereco(false);
+      }
     }
-  } finally {
-    setCalculandoTaxa(false);
-  }
-}, []);
 
+    carregar();
 
-  const carregarEndereco = useCallback(async () => {
+    return () => {
+      ativo = false;
+    };
+  }, [])
+);
+
+// 2) Calcula a taxa sempre que o endereço mudar
+useEffect(() => {
+  let ativo = true;
+
+  async function calcular() {
+    console.log("TAXA: iniciou para", endereco?.street, endereco?.city);
+    setTaxaEntrega(null);
+    setDistanciaKm(null);
+    setErroTaxa("");
+
+    if (!endereco) return;
+
+    setCalculandoTaxa(true);
     try {
-      setCarregandoEndereco(true);
-      calcularTaxaDoEndereco(marcado);
+      const coords =
+        typeof endereco.latitude === "number" && typeof endereco.longitude === "number"
+          ? { latitude: endereco.latitude, longitude: endereco.longitude }
+          : await geocodificar(endereco);
 
-      const uid = auth.currentUser?.uid;
-      if (!uid) {
-        setEndereco(null);
-        setCarregandoEndereco(false);
+      console.log("TAXA: coords", coords);
+
+      if (!coords) {
+        if (ativo) setErroTaxa("Não achei o endereço no mapa");
         return;
       }
 
-      const snapshot = await getDocs(addressesCollection(uid));
-      const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const { taxa, km } = await calcularTaxa(coords);
+      console.log("TAXA: resultado", taxa, km);
 
-      // Prioridade: endereço marcado como padrão (selected: true).
-      // Se nenhum estiver marcado, cai no primeiro da lista como fallback.
-      const marcado = list.find((a) => a.selected) || list[0] || null;
-
-      setEndereco(marcado);
+      if (ativo) {
+        setTaxaEntrega(taxa);
+        setDistanciaKm(km);
+      }
     } catch (e) {
-      console.log("Erro ao carregar endereço no Checkout:", e);
-      setEndereco(null);
+      console.log("TAXA: ERRO", e);
+      if (ativo) setErroTaxa(String(e?.message || e));
     } finally {
-      setCarregandoEndereco(false);
+      if (ativo) setCalculandoTaxa(false);
     }
-  }, [calcularTaxaDoEndereco]);
+  }
 
-  // Recarrega toda vez que a tela ganha foco — assim, ao voltar de
-  // "Addresses" depois de trocar o endereço padrão, o Checkout já
-  // aparece atualizado sem precisar reabrir a tela do zero.
-  useFocusEffect(
-    useCallback(() => {
-      carregarEndereco();
-    }, [carregarEndereco])
-  );
+  calcular();
+
+  return () => {
+    ativo = false;
+  };
+}, [endereco]);
+
 
   function formatarPreco(valor) {
     return `R$ ${Number(valor || 0).toFixed(2).replace(".", ",")}`;
@@ -306,19 +335,24 @@ export default function Checkout({ navigation, route }) {
     <Text style={styles.resumoValor}>{formatarPreco(totalCombo)}</Text>
   </View>
 
-  <View style={styles.resumoLinha}>
-    <Text style={styles.resumoLabel}>
-      Taxa de entrega
-      {taxaEntrega === null ? "Não calculada" : taxaEntrega === 0 ? "Grátis" : formatarPreco(taxaEntrega)}
+ <View style={styles.resumoLinha}>
+  <Text style={styles.resumoLabel}>
+    Taxa de entrega
+    {distanciaKm != null ? ` (${distanciaKm.toFixed(1).replace(".", ",")} km)` : ""}
+  </Text>
+
+  {calculandoTaxa ? (
+    <ActivityIndicator size="small" color={COLORS.rosaVidaPark} />
+  ) : (
+    <Text style={styles.resumoValor}>
+      {taxaEntrega === null
+        ? "Não calculada"
+        : taxaEntrega === 0
+        ? "Grátis"
+        : formatarPreco(taxaEntrega)}
     </Text>
-    {calculandoTaxa ? (
-      <ActivityIndicator size="small" color={COLORS.rosaVidaPark} />
-    ) : (
-      <Text style={styles.resumoValor}>
-        {taxaEntrega === null ? "—" : taxaEntrega === 0 ? "Grátis" : formatarPreco(taxaEntrega)}
-      </Text>
-    )}
-  </View>
+  )}
+</View>
 </View>
         {/* Data e horário */}
         <View style={styles.card}>
