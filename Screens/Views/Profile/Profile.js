@@ -5,6 +5,7 @@ import { signOut, onAuthStateChanged } from "firebase/auth";
 import { useTheme } from "../../../context/ThemeContext";
 import * as FileSystem from "expo-file-system/legacy";
 import React, { useState, useEffect } from "react";
+import Contact from "../../../components/Contact";
 
 const PROFILE_FILE = `${FileSystem.documentDirectory}bellaplus_profile.json`;
 
@@ -12,6 +13,7 @@ export default function Profile({ navigation }) {
   const [user, setUser] = useState(null);
   const [photoUri, setPhotoUri] = useState(null);
   const [savedName, setSavedName] = useState(null);
+  const [showContact, setShowContact] = useState(false);
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -121,6 +123,13 @@ export default function Profile({ navigation }) {
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.profileBox}>
+        <View style={styles.profileBox}>
+            <TouchableOpacity style={[styles.bellButton, { backgroundColor: theme.surface }]} onPress={logout}>
+            <Ionicons name="exit" size={20} color={theme.text} />
+          <View style={[styles.bellDot, { backgroundColor: theme.surface, borderColor: theme.surface }]} />
+        </TouchableOpacity>
+      </View>
+
         <View style={styles.avatarContainer}>
           {photoUri ? (
             <Image source={{ uri: photoUri }} style={[styles.avatarImage, { borderColor: theme.primary }]} />
@@ -139,9 +148,11 @@ export default function Profile({ navigation }) {
 
         <Text style={[styles.name, { color: theme.primary }]}>{getDisplayName()}</Text>
         <Text style={[styles.email, { color: theme.textSecondary }]}>{getEmail()}</Text>
+        
       </View>
 
       <View style={styles.menu}>
+        
         {options.map((item, index) => (
           <TouchableOpacity
             key={index}
@@ -159,13 +170,15 @@ export default function Profile({ navigation }) {
           </TouchableOpacity>
         ))}
 
-        <TouchableOpacity style={[styles.logout, { backgroundColor: theme.accent }]} onPress={logout}>
-          <Ionicons name="log-out-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
-          <Text style={styles.logoutText}>Sair da conta</Text>
-        </TouchableOpacity>
+        <TouchableOpacity style={[styles.logout, { backgroundColor: theme.accent }]} onPress={() => setShowContact(true)}>
+            <Ionicons name="information-circle-sharp" size={20} color="#fff" style={{ marginRight: 8 }} />
+            <Text style={styles.logoutText}>Informações da casa</Text>
+              </TouchableOpacity>
       </View>
 
       <View style={{ height: 100 }} />
+
+      <Contact visible={showContact} onClose={() => setShowContact(false)} />
     </ScrollView>
   );
 }
@@ -176,10 +189,15 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingHorizontal: 15,
   },
-  profileBox: {
-    alignItems: "center",
-    marginBottom: 30,
-  },
+bellDot: {
+  position: "absolute",
+  top: 8,
+  right: 8,
+  width: 8,
+  height: 8,
+  borderRadius: 4,
+  borderWidth: 1,
+},
   avatarContainer: {
     position: "relative",
     marginBottom: 15,
@@ -196,7 +214,30 @@ const styles = StyleSheet.create({
     height: 90,
     borderRadius: 45,
     borderWidth: 3,
+   
   },
+profileBox: {
+  alignItems: "center",
+  marginBottom: 30,
+  width: "100%",
+},
+bellButton: {
+  position: "absolute",
+  top: 0,
+  right: 0,
+  zIndex: 10,
+  width: 42,
+  height: 42,
+  borderRadius: 21,
+  alignItems: "center",
+  justifyContent: "center",
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 3,
+},
+  
   avatarText: {
     color: "#fff",
     fontSize: 38,

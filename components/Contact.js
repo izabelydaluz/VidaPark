@@ -48,6 +48,7 @@ export default function Contact({ visible, onClose }) {
                             <Text>24 Hrs </Text>
                             
                         </Text>
+                        
                     </ScrollView>
 
                     <CustomButton

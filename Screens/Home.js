@@ -67,14 +67,7 @@ export default function Home({ navigation, route }) {
               <Text style={[ styles.headerDescription, { color: theme.lightPink }, ]}> Escolha um evento e aproveite o melhor momento com a gente. </Text>
             </View>
 
-            <TouchableOpacity style={[styles.bellButton, { backgroundColor: theme.softBlue,  }, ]}onPress={() => navigation.navigate("Notifications")}>
-              <Ionicons
-                name="notifications-outline"
-                size={20}
-                color={theme.text}
-              />
-              <View style={[ styles.bellDot, { backgroundColor: theme.accent, borderColor: theme.primary }, ]} />
-            </TouchableOpacity>
+            
           </View>
         </ImageBackground>
 
@@ -205,18 +198,7 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
 
-  bellButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
+  
 
   bellDot: {
     position: "absolute",
