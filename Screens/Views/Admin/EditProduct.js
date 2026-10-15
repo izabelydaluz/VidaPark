@@ -1,18 +1,39 @@
 import { View, Text, TextInput, StyleSheet, Image, Alert } from 'react-native';
 import { Button } from "react-native-paper";
 import { db as database } from '../../../Firebase/firebaseConfig';
-import { useState } from 'react';
-import { doc, updateDoc } from 'firebase/firestore';
+import { useState, useEffect } from 'react';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import * as ImagePicker from 'expo-image-picker';
 
-
 export default function EditProduct({ navigation, route }) {
-    const { produto, aoSalvar } = route.params;
-    
-    const [nome, setNome] = useState(produto.nome);
-    const [valor, setValor] = useState(String(produto.valor));
-    const [descricao, setDescricao] = useState(produto.descricao);
-    const [imagem, setImagem] = useState(produto.imagem);
+    const { produtoId } = route.params;
+
+    const [carregando, setCarregando] = useState(true);
+    const [nome, setNome] = useState('');
+    const [valor, setValor] = useState('');
+    const [descricao, setDescricao] = useState('');
+    const [imagem, setImagem] = useState(null);
+
+    useEffect(() => {
+        async function carregarProduto() {
+            try {
+                const snap = await getDoc(doc(database, 'salgados', produtoId));
+                if (snap.exists()) {
+                    const dados = snap.data();
+                    setNome(dados.nome || '');
+                    setValor(String(dados.valor ?? ''));
+                    setDescricao(dados.descricao || '');
+                    setImagem(dados.imagem || null);
+                }
+            } catch (error) {
+                console.log('erro ao carregar produto', error);
+                Alert.alert('Erro', 'Não foi possível carregar o produto.');
+            } finally {
+                setCarregando(false);
+            }
+        }
+        carregarProduto();
+    }, [produtoId]);
 
     const escolherImagem = async () => {
         let resultado = await ImagePicker.launchImageLibraryAsync({
@@ -43,26 +64,15 @@ export default function EditProduct({ navigation, route }) {
                 });
             }
 
-            const produtoRef = doc(database, 'salgados', produto.id);
-            await updateDoc(produtoRef, {
+            await updateDoc(doc(database, 'salgados', produtoId), {
                 nome,
-                valor: parseFloat(valor),
+                valor: parseFloat(String(valor).replace(',', '.')),
                 descricao,
                 imagem: imagemBase64
             });
-            
+
             Alert.alert('Sucesso', 'Produto atualizado com sucesso!', [
-                {
-                    text: 'OK',
-                    onPress: () => {
-                        navigation.goBack();
-                        if (aoSalvar) {
-                            setTimeout(() => {
-                                aoSalvar();
-                            }, 100);
-                        }
-                    }
-                }
+                { text: 'OK', onPress: () => navigation.goBack() }
             ]);
 
         } catch (error) {
@@ -72,13 +82,16 @@ export default function EditProduct({ navigation, route }) {
     };
 
     const renderizarTextoBotao = () => {
-        if (imagem) {
-            return 'Trocar Imagem';
-        } else {
-            return 'Selecionar Imagem da Galeria';
-        }
+        return imagem ? 'Trocar Imagem' : 'Selecionar Imagem da Galeria';
     };
 
+    if (carregando) {
+        return (
+            <View style={styles.container}>
+                <Text style={styles.txt}>Carregando...</Text>
+            </View>
+        );
+    }
     return (
         <View style={styles.container}>
             <Text style={styles.txt}>Editar Produto</Text>

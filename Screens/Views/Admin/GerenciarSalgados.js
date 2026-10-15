@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useCallback, useMemo } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { View,Text,StyleSheet,FlatList,Alert,TouchableOpacity,Image,TextInput,} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { db as database } from "../../../Firebase/firebaseConfig";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
-import {useTheme} from "../../../context/ThemeContext";
-import SalgadosPacotes from "./SalgadosPacotes";
 
 
 const COLORS = {
@@ -52,9 +51,11 @@ export default function GerenciarSalgados({ navigation }) {
     }
   }
 
-  useEffect(() => {
-    carregarProduto();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      carregarProduto();
+    }, [] )
+  );
 
   async function ExcluirProdutos(id) {
     try {
@@ -82,7 +83,7 @@ export default function GerenciarSalgados({ navigation }) {
   }
 
   function EditarProdutos(produto) {
-    navigation.navigate("EditProduct", { produto, aoSalvar: carregarProduto });
+    navigation.navigate("EditProduct", { produtoId: produto.id});
   }
 
   function AdicionarProdutos() {

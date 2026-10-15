@@ -5,13 +5,13 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { Platform, AppState } from "react-native";
 import * as NavigationBar from "expo-navigation-bar";
 import Entypo from '@expo/vector-icons/Entypo';
- 
+
 import Login from './Screens/Views/Auth/Login'
 import SalgadosPacotes from "./Screens/Views/Admin/SalgadosPacotes";
 import ADM from "./Screens/Views/Admin/adm";
 import GerenciarSalgados from "./Screens/Views/Admin/GerenciarSalgados";
 import GerenciarPacotes from "./Screens/Views/Admin/GerenciarPacotes";
-import AddProdutos from "./Screens/Views/Admin/AddProduto";
+import AddProdutos from "./Screens/Views/Admin/AddProdutos";
 
 import AddPacote from "./Screens/Views/Admin/AddPacote";
 import EditPacote from "./Screens/Views/Admin/EditPacote";
@@ -37,11 +37,11 @@ import Checkout from "./Screens/Views/Checkout/Checkout";
 import MeusPedidos from "./Screens/MeusPedidos";
 import TamanhoCombo from "./Screens/TamanhoCombo";
 import Pacotes from "./Screens/Pacotes";
- 
+
 function TabNavigate() {
   const Tab = createBottomTabNavigator();
   const { theme } = useTheme();
- 
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -67,18 +67,18 @@ function TabNavigate() {
           )
         }} />
 
-        <Tab.Screen name="Catalogo" component={CatalogoSalgados}
+      <Tab.Screen name="Catalogo" component={CatalogoSalgados}
         options={{
           headerShown: false,
           tabBarIcon: ({ color }) => (
             <Entypo name="shopping-bag" size={20} color={color} />
-            
+
           )
-        }} />     
-    
- 
-      
- 
+        }} />
+
+
+
+
       <Tab.Screen name="Perfil" component={Profile}
         options={{
           headerShown: false,
@@ -89,30 +89,30 @@ function TabNavigate() {
     </Tab.Navigator>
   )
 }
- 
+
 function AppContent() {
   const Stack = createStackNavigator();
   const { theme } = useTheme();
   const appState = useRef(AppState.currentState);
- 
+
   useEffect(() => {
     if (Platform.OS !== "android") return;
- 
+
     async function hideBar() {
       await NavigationBar.setVisibilityAsync("hidden");
     }
     hideBar();
- 
+
     const sub = AppState.addEventListener("change", (next) => {
       if (appState.current.match(/background/) && next === "active") {
         hideBar();
       }
       appState.current = next;
     });
- 
+
     return () => sub.remove();
   }, []);
- 
+
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -121,12 +121,11 @@ function AppContent() {
         }}
       >
 
-       
 
         <Stack.Screen name="Login" component={Login} options={{
           headerShown: false
         }} />
- 
+
         <Stack.Screen name="Cadastrar" component={Cadastrar} options={{
           title: "Cadastrar",
           headerTransparent: true,
@@ -134,8 +133,8 @@ function AppContent() {
           headerTintColor: "#fff",
           headerTitleStyle: { color: "#fff" },
         }} />
- 
-        
+
+
         <Stack.Screen name="ADM" component={ADM} options={{
           headerShown: false
         }} />
@@ -144,14 +143,14 @@ function AppContent() {
           headerShown: false
         }} />
 
- 
+
         <Stack.Screen name="GerenciarSalgados" component={GerenciarSalgados} options={{
           title: 'Gerenciar Salgados',
           headerStyle: { backgroundColor: '#202040' },
           headerTintColor: '#F8F8F8',
         }} />
- 
-         <Stack.Screen name="GerenciarPacotes" component={GerenciarPacotes} options={{
+
+        <Stack.Screen name="GerenciarPacotes" component={GerenciarPacotes} options={{
           title: 'Gerenciar Pacotes',
           headerStyle: { backgroundColor: '#202040' },
           headerTintColor: '#F8F8F8',
@@ -163,21 +162,32 @@ function AppContent() {
           headerStyle: { backgroundColor: '#202040' },
           headerTintColor: '#F8F8F8',
         }} />
- 
+
         <Stack.Screen name="GerenciarCliente" component={GerenciarCliente} options={{
           title: 'Gerenciar Cliente',
           headerStyle: { backgroundColor: '#202040' },
           headerTintColor: '#F8F8F8',
         }} />
- 
+
+        <Stack.Screen name="AddProdutos" component={AddProdutos} options={{
+        headerShown: false
+        }} />
+
+
         <Stack.Screen name="AddPacote" component={AddPacote}
-        options={{ headerShown: false, }}/>
+          options={{ headerShown: false, }} />
 
-          <Stack.Screen name="EditPacote" component={EditPacote}
-             options={{ headerShown: false, }}/>
+        <Stack.Screen name="EditProduct"
+          component={EditProduct}
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen name="EditPacote"
+          component={EditPacote}
+          options={{ headerShown: false }}
+        />
 
 
-        
         <Stack.Screen name="Home" component={TabNavigate} options={{
           headerShown: false
         }} />
@@ -195,12 +205,12 @@ function AppContent() {
         <Stack.Screen name="Pacotes" component={Pacotes} options={{
           headerShown: false
         }} />
-        
+
         <Stack.Screen name="MonteSeuCombo" component={MonteSeuCombo} options={{
           headerShown: false
         }} />
 
-        
+
         <Stack.Screen name="Carrinho" component={Carrinho} options={{
           headerShown: false
         }} />
@@ -238,7 +248,7 @@ function AppContent() {
     </NavigationContainer>
   );
 }
- 
+
 export default function App() {
   return (
     <ThemeProvider>

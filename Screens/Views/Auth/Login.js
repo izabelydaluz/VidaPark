@@ -147,7 +147,7 @@ export default function Login({ navigation }) {
 
 
         <Button style={styles.button} buttonColor="#852b4aff" textColor="#ffffffff" mode="contained"onPress={EntrarConta}loading={carregando}  disabled={carregando} >
-          Entrar
+        Entrar
         </Button>
 
         <TouchableOpacity onPress={() => navigation.navigate("Cadastrar") }>
