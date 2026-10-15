@@ -37,7 +37,7 @@ import Checkout from "./Screens/Views/Checkout/Checkout";
 import MeusPedidos from "./Screens/MeusPedidos";
 import TamanhoCombo from "./Screens/TamanhoCombo";
 import Pacotes from "./Screens/Pacotes";
-
+ 
 function TabNavigate() {
   const Tab = createBottomTabNavigator();
   const { theme } = useTheme();
@@ -59,20 +59,21 @@ function TabNavigate() {
     >
 
 
-      <Tab.Screen name="Home" component={Home}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color }) => (
-            <Entypo name="home" size={20} color={color} />
-          )
-        }} />
+      <Tab.Screen name="Inicio" component={Home}
+  options={{
+    title: "Home",
+    headerShown: false,
+    tabBarIcon: ({ color }) => (
+      <Entypo name="home" size={20} color={color} />
+    )
+  }} />
 
-      <Tab.Screen name="Catalogo" component={CatalogoSalgados}
+        <Tab.Screen name="Catalogo" component={CatalogoSalgados}
         options={{
           headerShown: false,
           tabBarIcon: ({ color }) => (
             <Entypo name="shopping-bag" size={20} color={color} />
-
+            
           )
         }} />
 
@@ -194,18 +195,18 @@ function AppContent() {
 
 
 
-        <Stack.Screen name="catalogo" component={TabNavigate} options={{
-          headerShown: false
-        }} />
-
+        <Stack.Screen name="catalogoSalgados" component={CatalogoSalgados} options={{
+  headerShown: false
+}} />
         <Stack.Screen name="TamanhoCombo" component={TamanhoCombo} options={{
           headerShown: false
         }} />
 
+
         <Stack.Screen name="Pacotes" component={Pacotes} options={{
           headerShown: false
         }} />
-
+        
         <Stack.Screen name="MonteSeuCombo" component={MonteSeuCombo} options={{
           headerShown: false
         }} />

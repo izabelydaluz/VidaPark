@@ -44,6 +44,11 @@ export default function ADM({ navigation }) {
           <Text style={styles.cardTxt}>Controle de Vendas</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity style={styles.cardLargo2} activeOpacity={0.7} onPress={() => navigation.navigate('GaleriaAdmin')}>
+          <IconButton icon="camera" iconColor="#E84890" size={40} pointerEvents="none" />
+          <Text style={styles.cardTxt}>galeria</Text>
+        </TouchableOpacity>
+
       </View>
 
     </View>
@@ -102,6 +107,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 10,
+  },
+   cardLargo2: {
+    backgroundColor: '#34345C',
+    width: '100%',
+    height: 120,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
+    margin: 2,
   },
   cardTxt: {
     color: '#F8F8F8',

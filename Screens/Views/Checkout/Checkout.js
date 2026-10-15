@@ -5,6 +5,8 @@ import { useFocusEffect } from "@react-navigation/native";
 import { auth, db } from "../../../Firebase/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 import { callFunction } from "../Checkout/mercadopago";
+import { geocodificar, calcularTaxa } from "../Profile/taxaEntrega";
+import  { useEffect } from "react";
 
 function addressesCollection(uid) {
   return collection(db, "users", uid, "addresses");
@@ -61,9 +63,15 @@ function contarUnidades(combo) {
 export default function Checkout({ navigation, route }) {
   // Dados que vieram do Carrinho
   const combo = route?.params?.combo || [];
-  const totalCombo = route?.params?.totalCombo || 0;
-  const taxaEntrega = route?.params?.taxaEntrega || 5;
-  const totalGeral = route?.params?.totalGeral || totalCombo + taxaEntrega;
+  const totalCombo = route?.params?.totalCombo || 0;   
+
+  const [taxaEntrega, setTaxaEntrega] = useState(null);
+  const [distanciaKm, setDistanciaKm] = useState(null);
+  const [calculandoTaxa, setCalculandoTaxa] = useState(false);
+
+  const totalGeral = totalCombo + (taxaEntrega || 0);   
+
+ 
 
   // Endereço vem do Firestore (users/{uid}/addresses),
   // priorizando o que está marcado como "selected" na tela Addresses.
@@ -75,41 +83,95 @@ export default function Checkout({ navigation, route }) {
   const [formaPagamento, setFormaPagamento] = useState("pix");
   const [enviando, setEnviando] = useState(false);
 
-  const carregarEndereco = useCallback(async () => {
-    try {
-      setCarregandoEndereco(true);
 
-      const uid = auth.currentUser?.uid;
-      if (!uid) {
-        setEndereco(null);
-        setCarregandoEndereco(false);
+
+
+  const [erroTaxa, setErroTaxa] = useState("");
+
+// 1) Carrega o endereço quando a tela ganha foco
+useFocusEffect(
+  useCallback(() => {
+    let ativo = true;
+
+    async function carregar() {
+      try {
+        setCarregandoEndereco(true);
+
+        const uid = auth.currentUser?.uid;
+        if (!uid) {
+          if (ativo) setEndereco(null);
+          return;
+        }
+
+        const snapshot = await getDocs(addressesCollection(uid));
+        const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+        const marcado = list.find((a) => a.selected) || list[0] || null;
+
+        if (ativo) setEndereco(marcado);
+      } catch (e) {
+        console.log("Erro ao carregar endereço no Checkout:", e);
+        if (ativo) setEndereco(null);
+      } finally {
+        if (ativo) setCarregandoEndereco(false);
+      }
+    }
+
+    carregar();
+
+    return () => {
+      ativo = false;
+    };
+  }, [])
+);
+
+// 2) Calcula a taxa sempre que o endereço mudar
+useEffect(() => {
+  let ativo = true;
+
+  async function calcular() {
+    console.log("TAXA: iniciou para", endereco?.street, endereco?.city);
+    setTaxaEntrega(null);
+    setDistanciaKm(null);
+    setErroTaxa("");
+
+    if (!endereco) return;
+
+    setCalculandoTaxa(true);
+    try {
+      const coords =
+        typeof endereco.latitude === "number" && typeof endereco.longitude === "number"
+          ? { latitude: endereco.latitude, longitude: endereco.longitude }
+          : await geocodificar(endereco);
+
+      console.log("TAXA: coords", coords);
+
+      if (!coords) {
+        if (ativo) setErroTaxa("Não achei o endereço no mapa");
         return;
       }
 
-      const snapshot = await getDocs(addressesCollection(uid));
-      const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const { taxa, km } = await calcularTaxa(coords);
+      console.log("TAXA: resultado", taxa, km);
 
-      // Prioridade: endereço marcado como padrão (selected: true).
-      // Se nenhum estiver marcado, cai no primeiro da lista como fallback.
-      const marcado = list.find((a) => a.selected) || list[0] || null;
-
-      setEndereco(marcado);
+      if (ativo) {
+        setTaxaEntrega(taxa);
+        setDistanciaKm(km);
+      }
     } catch (e) {
-      console.log("Erro ao carregar endereço no Checkout:", e);
-      setEndereco(null);
+      console.log("TAXA: ERRO", e);
+      if (ativo) setErroTaxa(String(e?.message || e));
     } finally {
-      setCarregandoEndereco(false);
+      if (ativo) setCalculandoTaxa(false);
     }
-  }, []);
+  }
 
-  // Recarrega toda vez que a tela ganha foco — assim, ao voltar de
-  // "Addresses" depois de trocar o endereço padrão, o Checkout já
-  // aparece atualizado sem precisar reabrir a tela do zero.
-  useFocusEffect(
-    useCallback(() => {
-      carregarEndereco();
-    }, [carregarEndereco])
-  );
+  calcular();
+
+  return () => {
+    ativo = false;
+  };
+}, [endereco]);
+
 
   function formatarPreco(valor) {
     return `R$ ${Number(valor || 0).toFixed(2).replace(".", ",")}`;
@@ -117,6 +179,13 @@ export default function Checkout({ navigation, route }) {
 
   async function confirmarPedido() {
     if (!endereco) {
+      if (taxaEntrega === null) {
+  Alert.alert(
+    "Taxa de entrega",
+    "Não conseguimos calcular a taxa para este endereço. Confira o endereço e tente de novo."
+  );
+  return;
+}
       Alert.alert(
         "Endereço necessário",
         "Adicione um endereço de entrega antes de confirmar o pedido.",
@@ -258,6 +327,33 @@ export default function Checkout({ navigation, route }) {
           )}
         </View>
 
+<View style={styles.card}>
+  <Text style={styles.cardTitulo}>Resumo</Text>
+
+  <View style={styles.resumoLinha}>
+    <Text style={styles.resumoLabel}>Combo</Text>
+    <Text style={styles.resumoValor}>{formatarPreco(totalCombo)}</Text>
+  </View>
+
+ <View style={styles.resumoLinha}>
+  <Text style={styles.resumoLabel}>
+    Taxa de entrega
+    {distanciaKm != null ? ` (${distanciaKm.toFixed(1).replace(".", ",")} km)` : ""}
+  </Text>
+
+  {calculandoTaxa ? (
+    <ActivityIndicator size="small" color={COLORS.rosaVidaPark} />
+  ) : (
+    <Text style={styles.resumoValor}>
+      {taxaEntrega === null
+        ? "Não calculada"
+        : taxaEntrega === 0
+        ? "Grátis"
+        : formatarPreco(taxaEntrega)}
+    </Text>
+  )}
+</View>
+</View>
         {/* Data e horário */}
         <View style={styles.card}>
           <Text style={styles.cardTitulo}>Data e horário</Text>
@@ -310,7 +406,7 @@ export default function Checkout({ navigation, route }) {
         <TouchableOpacity
           style={[styles.confirmarButton, enviando && { opacity: 0.7 }]}
           onPress={confirmarPedido}
-          disabled={enviando}
+          disabled={enviando || calculandoTaxa}
         >
           {enviando ? (
             <ActivityIndicator size="small" color={COLORS.branco} />
@@ -328,7 +424,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.branco,
   },
-
+resumoLinha: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginTop: 8,
+},
+resumoLabel: { fontSize: 13, color: COLORS.textoSecundario },
+resumoValor: { fontSize: 13, fontWeight: "700", color: COLORS.azulVidaPark },
   // Header
   header: {
     backgroundColor: COLORS.azulVidaPark,
