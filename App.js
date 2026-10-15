@@ -200,9 +200,10 @@ function AppContent() {
           headerShown: false
         }} />
         
-        <Stack.Screen name="Galeria" component={Galeria} options={{
-          headerShown: false
-        }} />
+
+
+        <Stack.Screen name="GaleriaAdmin" component={Galeria} initialParams={{ admin: true }} options={{ 
+          headerShown: false }} />
 
         <Stack.Screen name="MonteSeuCombo" component={MonteSeuCombo} options={{
           headerShown: false
