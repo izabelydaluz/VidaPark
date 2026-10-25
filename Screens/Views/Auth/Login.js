@@ -1,11 +1,12 @@
-import {TextInput, Text, StyleSheet, Alert, ImageBackground, View, TouchableOpacity, Linking,
-useWindowDimensions, KeyboardAvoidingView, ScrollView, Platform, ActivityIndicator,
+import {
+  TextInput, Text, StyleSheet, Alert, ImageBackground, View, TouchableOpacity, Linking,
+  useWindowDimensions, KeyboardAvoidingView, ScrollView, Platform, ActivityIndicator,
 } from "react-native";
 import { Button } from "react-native-paper";
 import { useEffect, useRef, useState } from "react";
 
 import { auth, db as database } from "../../../Firebase/firebaseConfig";
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import Entypo from "@expo/vector-icons/Entypo";
 
@@ -55,6 +56,7 @@ export default function Login({ navigation }) {
   const [senha, setSenha] = useState("");
   const [ocultarSenha, setOcultarSenha] = useState(true);
   const [carregando, setCarregando] = useState(false);
+  const [enviandoRedefinicao, setEnviandoRedefinicao] = useState(false);
   // Enquanto o app confere se já existe uma sessão salva, não mostramos o formulário.
   const [verificandoSessao, setVerificandoSessao] = useState(true);
 
@@ -166,6 +168,47 @@ export default function Login({ navigation }) {
     }
   };
 
+  // Envia o e-mail de redefinição de senha para o endereço digitado no campo de e-mail.
+  const EsqueciSenha = async () => {
+    const emailLimpo = email.trim().toLowerCase();
+
+    if (!EMAIL_REGEX.test(emailLimpo)) {
+      Alert.alert(
+        "Esqueci minha senha",
+        "Digite seu e-mail no campo acima e toque em “Esqueci minha senha” novamente."
+      );
+      return;
+    }
+
+    setEnviandoRedefinicao(true);
+    try {
+      auth.languageCode = "pt"; // e-mail do Firebase em português
+      await sendPasswordResetEmail(auth, emailLimpo);
+
+      // Mensagem propositalmente genérica: não revela se o e-mail tem conta ou não.
+      Alert.alert(
+        "Verifique seu e-mail",
+        `Se existir uma conta com ${emailLimpo}, enviamos um link para criar uma nova senha. Confira também a caixa de spam.`
+      );
+    } catch (error) {
+      switch (error?.code) {
+        case "auth/invalid-email":
+          Alert.alert("Erro", "Digite um e-mail válido.");
+          break;
+        case "auth/too-many-requests":
+          Alert.alert("Erro", "Muitas tentativas seguidas. Aguarde alguns minutos e tente novamente.");
+          break;
+        case "auth/network-request-failed":
+          Alert.alert("Erro", "Sem conexão com a internet. Verifique sua rede e tente novamente.");
+          break;
+        default:
+          Alert.alert("Erro", "Não foi possível enviar o e-mail agora. Tente novamente.");
+      }
+    } finally {
+      setEnviandoRedefinicao(false);
+    }
+  };
+
   return (
     <ImageBackground source={logo} style={styles.fundo} resizeMode="cover">
       <View style={styles.overlay}>
@@ -237,6 +280,17 @@ export default function Login({ navigation }) {
               >
                 Entrar
               </Button>
+
+              <TouchableOpacity
+                onPress={EsqueciSenha}
+                disabled={enviandoRedefinicao}
+                accessibilityRole="button"
+                style={styles.esqueciContainer}
+              >
+                <Text style={styles.esqueciTexto}>
+                  {enviandoRedefinicao ? "Enviando..." : "Esqueci minha senha"}
+                </Text>
+              </TouchableOpacity>
 
               <TouchableOpacity onPress={() => navigation.navigate("Cadastrar")}>
                 <Text style={styles.textoConta}>
@@ -324,6 +378,16 @@ const styles = StyleSheet.create({
 
   button: {
     margin: 10,
+  },
+
+  esqueciContainer: {
+    paddingVertical: 8,
+    marginBottom: 6,
+  },
+
+  esqueciTexto: {
+    color: "#FFFFFF",
+    textDecorationLine: "underline",
   },
 
   textoConta: {
