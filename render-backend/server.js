@@ -34,6 +34,8 @@ const PUBLIC_URL = process.env.PUBLIC_URL || "";
 const WEBHOOK_URL = `${PUBLIC_URL}/mercadopagoWebhook`;
 const MP_WEBHOOK_SECRET = process.env.MP_WEBHOOK_SECRET || "";
 
+if (!MP_ACCESS_TOKEN) console.error("ATENÇÃO: variável MP_ACCESS_TOKEN não está definida no Render.");
+
 function authHeaders() {
   return { Authorization: `Bearer ${MP_ACCESS_TOKEN}`, "Content-Type": "application/json" };
 }
@@ -156,8 +158,8 @@ app.post("/createPayment", async (req, res) => {
     console.error("MP payment error:", JSON.stringify({ status: statusCode, data: mpErr, requestBody: reqData }, null, 2));
     const causes = mpErr?.cause || [];
     const causeStr = causes.map((c) => `código ${c.code || "?"} ${c.description || ""}`).join(" | ");
-    const firstCause = causes[0] || {};
-    fail(res, "INTERNAL", `Erro MP (${statusCode}): ${causeStr || `código ${firstCause.code} ${firstCause.description}` || mpErr?.message || "Erro desconhecido"}`);
+    const detalhe = causeStr || mpErr?.message || mpErr?.error || e.message || "Erro desconhecido";
+    fail(res, "INTERNAL", `Erro MP (${statusCode ?? "sem resposta"}): ${detalhe}`);
   }
 });
 

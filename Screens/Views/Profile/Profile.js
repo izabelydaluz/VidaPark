@@ -1,7 +1,8 @@
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { auth, db } from "../../../Firebase/firebaseConfig";
-import { signOut, onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
+import { confirmarSaida } from "../utils/sessao";
 import { doc, getDoc } from "firebase/firestore";
 import { useTheme } from "../../../context/ThemeContext";
 import React, { useState, useEffect } from "react";
@@ -53,26 +54,7 @@ export default function Profile({ navigation }) {
   }
 
   function logout() {
-    Alert.alert(
-      "Sair da conta",
-      "Deseja realmente sair?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Sair",
-          onPress: async () => {
-            try {
-              await signOut(auth);
-              setUser(null);
-              // reset: limpa o histórico, então o botão voltar não retorna ao app deslogado
-              navigation.reset({ index: 0, routes: [{ name: "Login" }] });
-            } catch (error) {
-              Alert.alert("Erro", "Não foi possível sair da conta.");
-            }
-          },
-        },
-      ]
-    );
+    confirmarSaida(navigation, () => setUser(null));
   }
 
   function getInitials() {

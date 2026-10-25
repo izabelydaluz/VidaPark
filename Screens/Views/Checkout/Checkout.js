@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import {View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert,} from "react-native";
+import {View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert, TextInput,} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { auth, db } from "../../../Firebase/firebaseConfig";
@@ -7,6 +7,27 @@ import { collection, getDocs } from "firebase/firestore";
 import { callFunction } from "../Checkout/mercadopago";
 import { geocodificar, calcularTaxa } from "../Profile/taxaEntrega";
 import  { useEffect } from "react";
+
+// CPF: máscara e validação dos dígitos verificadores (o Pix do Mercado Pago exige CPF válido)
+function mascararCpf(v) {
+  const d = String(v).replace(/\D/g, "").slice(0, 11);
+  return d
+    .replace(/^(\d{3})(\d)/, "$1.$2")
+    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1-$2");
+}
+
+function cpfValido(v) {
+  const c = String(v).replace(/\D/g, "");
+  if (c.length !== 11 || /^(\d)\1{10}$/.test(c)) return false;
+  for (let t = 9; t < 11; t++) {
+    let soma = 0;
+    for (let i = 0; i < t; i++) soma += Number(c[i]) * (t + 1 - i);
+    const dv = ((soma * 10) % 11) % 10;
+    if (dv !== Number(c[t])) return false;
+  }
+  return true;
+}
 
 function addressesCollection(uid) {
   return collection(db, "users", uid, "addresses");
@@ -81,6 +102,7 @@ export default function Checkout({ navigation, route }) {
   const [data] = useState("25/05/2025");
   const [horario] = useState("18:00");
   const [formaPagamento, setFormaPagamento] = useState("pix");
+  const [cpf, setCpf] = useState("");
   const [enviando, setEnviando] = useState(false);
 
 
@@ -204,6 +226,11 @@ useEffect(() => {
       return;
     }
 
+    if (formaPagamento === "pix" && !cpfValido(cpf)) {
+      Alert.alert("CPF inválido", "Informe um CPF válido para gerar o Pix.");
+      return;
+    }
+
     setEnviando(true);
 
     try {
@@ -235,7 +262,7 @@ useEffect(() => {
           paymentMethod: "pix",
           amount: totalGeral,
           description,
-          payerInfo: { name, email },
+          payerInfo: { name, email, cpf: cpf.replace(/\D/g, "") },
         });
 
         setEnviando(false);
@@ -393,6 +420,29 @@ useEffect(() => {
               </TouchableOpacity>
             );
           })}
+
+          {formaPagamento === "pix" && (
+            <View style={{ marginTop: 12 }}>
+              <Text style={styles.pagamentoLabel}>CPF do pagador</Text>
+              <TextInput
+                value={cpf}
+                onChangeText={(v) => setCpf(mascararCpf(v))}
+                placeholder="000.000.000-00"
+                keyboardType="number-pad"
+                maxLength={14}
+                style={{
+                  marginTop: 6,
+                  borderWidth: 1,
+                  borderColor: COLORS.bordaClara,
+                  borderRadius: 10,
+                  paddingHorizontal: 12,
+                  paddingVertical: 10,
+                  fontSize: 15,
+                  color: COLORS.azulVidaPark,
+                }}
+              />
+            </View>
+          )}
         </View>
       </ScrollView>
 
