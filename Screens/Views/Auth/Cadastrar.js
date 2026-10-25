@@ -1,14 +1,14 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {TextInput, Text, StyleSheet, Alert, ImageBackground, View, TouchableOpacity, Linking, useWindowDimensions, ScrollView, KeyboardAvoidingView, Platform} from "react-native";
 import { Button } from "react-native-paper";
 import Entypo from "@expo/vector-icons/Entypo";
 
 import { auth, db as database } from "../../../Firebase/firebaseConfig";
-import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import { createUserWithEmailAndPassword, updateProfile, signOut } from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { regrasSenha } from "../utils/senha";
 
-const imagemDesktop = require("../../../Images/logo.png");
-const imagemMobile = require("../../../Images/logo.png");
+const logo = require("../../../Images/logo.png");
 
 const COR_ERRO = "#ff6b6b";
 const COR_OK = "#7ee08a";
@@ -16,11 +16,15 @@ const COR_OK = "#7ee08a";
 const abrirInstagram = async () => {
   const url = "https://www.instagram.com/vidapark/";
 
-  const supported = await Linking.canOpenURL(url);
+  try {
+    const supported = await Linking.canOpenURL(url);
 
-  if (supported) {
-    await Linking.openURL(url);
-  } else {
+    if (supported) {
+      await Linking.openURL(url);
+    } else {
+      Alert.alert("Não foi possível abrir o Instagram");
+    }
+  } catch {
     Alert.alert("Não foi possível abrir o Instagram");
   }
 };
@@ -40,13 +44,6 @@ const validarEmail = (valor) => {
   }
   return "";
 };
-
-// Regras da senha (usadas no checklist em tempo real)
-const regrasSenha = (valor) => [
-  { id: "tamanho", texto: "Pelo menos 8 caracteres", ok: valor.length >= 8 },
-  { id: "maiuscula", texto: "Uma letra maiúscula", ok: /[A-Z]/.test(valor) },
-  { id: "numero", texto: "Um número", ok: /[0-9]/.test(valor) },
-];
 
 function TextoErro({ mensagem }) {
   if (!mensagem) return null;
@@ -79,13 +76,15 @@ function ChecklistSenha({ regras }) {
 
 
 export default function Cadastrar({ navigation }) {
-  const { width, height } = useWindowDimensions();
-  const imagemFundo = width < 600 ? imagemMobile : imagemDesktop;
+  const { height } = useWindowDimensions();
+
+  const emailRef = useRef(null);
+  const senhaRef = useRef(null);
 
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [mostrarSenha, setMostrarSenha] = useState(true);
+  const [ocultarSenha, setOcultarSenha] = useState(true);
   const [carregando, setCarregando] = useState(false);
 
   // Campos que o usuário já "visitou" (para não mostrar erro antes da hora)
@@ -140,37 +139,47 @@ export default function Cadastrar({ navigation }) {
     setCarregando(true);
     setErroServidor({ email: "", senha: "" });
 
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email.trim(),
-        senha
-      );
+    const emailLimpo = email.trim().toLowerCase();
+    const nomeLimpo = nome.trim();
 
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, emailLimpo, senha);
       const user = userCredential.user;
 
-      await setDoc(doc(database, "usuarios", user.uid), {
-        nome: nome.trim(),
-        email: email.trim(),
+      const dadosPerfil = {
+        nome: nomeLimpo,
+        email: emailLimpo,
         role: "cliente",
         banido: false,
         criadoEm: serverTimestamp(),
-      });
+      };
+
+      // Cria o perfil no Firestore. Se falhar, tenta mais uma vez; se falhar de novo,
+      // apaga a conta recém-criada para o usuário poder se cadastrar de novo sem
+      // ficar com um e-mail "preso" sem perfil.
+      try {
+        await setDoc(doc(database, "usuarios", user.uid), dadosPerfil);
+      } catch (erroPerfil) {
+        try {
+          await setDoc(doc(database, "usuarios", user.uid), dadosPerfil);
+        } catch {
+          await user.delete().catch(() => {});
+          throw erroPerfil;
+        }
+      }
+
+      // Guarda o nome no perfil do Firebase Auth (não é crítico se falhar).
+      await updateProfile(user, { displayName: nomeLimpo }).catch(() => {});
 
       await signOut(auth);
 
       Alert.alert(
         "Cadastro realizado!",
         "Sua conta foi criada. Agora faça login.",
-        [
-          {
-            text: "OK",
-            onPress: () => navigation.navigate("Login"),
-          },
-        ]
+        [{ text: "OK", onPress: () => navigation.navigate("Login") }],
+        { cancelable: false }
       );
     } catch (error) {
-      console.log(error);
       traduzirErroFirebase(error);
     } finally {
       setCarregando(false);
@@ -178,14 +187,14 @@ export default function Cadastrar({ navigation }) {
   };
 
   return (
-    <ImageBackground source={imagemFundo} style={styles.fundo} resizeMode="stretch">
+    <ImageBackground source={logo} style={styles.fundo} resizeMode="cover">
       <KeyboardAvoidingView
         style={styles.fundo}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <View style={styles.overlay}>
           <ScrollView
-            contentContainerStyle={styles.conteudo}
+            contentContainerStyle={[styles.conteudo, { paddingTop: Math.round(height * 0.5) }]}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
@@ -199,6 +208,9 @@ export default function Cadastrar({ navigation }) {
                 onChangeText={setNome}
                 onBlur={() => marcarTocado("nome")}
                 autoCapitalize="words"
+                returnKeyType="next"
+                onSubmitEditing={() => emailRef.current?.focus()}
+                blurOnSubmit={false}
               />
               <TextoErro mensagem={erroNomeExibido} />
             </View>
@@ -206,6 +218,7 @@ export default function Cadastrar({ navigation }) {
             {/* E-MAIL */}
             <View style={styles.campo}>
               <TextInput
+                ref={emailRef}
                 style={[styles.barra, erroEmailExibido ? styles.bordaErro : null]}
                 placeholder="E-mail"
                 placeholderTextColor="#666"
@@ -218,6 +231,9 @@ export default function Cadastrar({ navigation }) {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
+                returnKeyType="next"
+                onSubmitEditing={() => senhaRef.current?.focus()}
+                blurOnSubmit={false}
               />
               <TextoErro mensagem={erroEmailExibido} />
             </View>
@@ -231,6 +247,7 @@ export default function Cadastrar({ navigation }) {
                 ]}
               >
                 <TextInput
+                  ref={senhaRef}
                   style={styles.input}
                   placeholder="Senha"
                   placeholderTextColor="#666"
@@ -240,13 +257,21 @@ export default function Cadastrar({ navigation }) {
                     if (erroServidor.senha) setErroServidor((e) => ({ ...e, senha: "" }));
                   }}
                   onFocus={() => marcarTocado("senha")}
-                  secureTextEntry={mostrarSenha}
+                  secureTextEntry={ocultarSenha}
                   autoCapitalize="none"
+                  autoCorrect={false}
+                  returnKeyType="done"
+                  onSubmitEditing={CriarConta}
                 />
 
-                <TouchableOpacity onPress={() => setMostrarSenha(!mostrarSenha)}>
+                <TouchableOpacity
+                  onPress={() => setOcultarSenha(!ocultarSenha)}
+                  accessibilityRole="button"
+                  accessibilityLabel={ocultarSenha ? "Mostrar senha" : "Ocultar senha"}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
                   <Entypo
-                    name={mostrarSenha ? "eye-with-line" : "eye"}
+                    name={ocultarSenha ? "eye-with-line" : "eye"}
                     size={24}
                     color="#852b4aff"
                   />
@@ -268,10 +293,21 @@ export default function Cadastrar({ navigation }) {
             >
               Cadastrar
             </Button>
+
+            {!formularioValido && (tocado.nome || tocado.email || tocado.senha) && (
+              <Text style={styles.dicaBotao}>
+                Preencha nome, e-mail e uma senha que cumpra todas as regras para continuar.
+              </Text>
+            )}
           </ScrollView>
 
           <View style={styles.footer}>
-            <TouchableOpacity style={styles.instagramContainer} onPress={abrirInstagram}>
+            <TouchableOpacity
+              style={styles.instagramContainer}
+              onPress={abrirInstagram}
+              accessibilityRole="link"
+              accessibilityLabel="Abrir o Instagram da VidaPark"
+            >
               <Entypo name="instagram-with-circle" size={24} color="#852b4aff" />
               <Text style={styles.instagramText}>@VidaPark</Text>
             </TouchableOpacity>
@@ -295,13 +331,15 @@ const styles = StyleSheet.create({
   },
   conteudo: {
     alignItems: "center",
-    paddingTop: 420,
     paddingBottom: 90, // espaço para o rodapé não cobrir o conteúdo
   },
-  logoContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 20,
+  dicaBotao: {
+    width: "80%",
+    maxWidth: 350,
+    color: "#FFFFFF",
+    fontSize: 12,
+    textAlign: "center",
+    marginTop: 10,
   },
   campo: {
     width: "80%",

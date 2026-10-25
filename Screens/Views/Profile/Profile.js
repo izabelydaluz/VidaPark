@@ -1,13 +1,12 @@
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { auth } from "../../../Firebase/firebaseConfig";
+import { auth, db } from "../../../Firebase/firebaseConfig";
 import { signOut, onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import { useTheme } from "../../../context/ThemeContext";
-import * as FileSystem from "expo-file-system/legacy";
 import React, { useState, useEffect } from "react";
 import Contact from "../../../components/Contact";
-
-const PROFILE_FILE = `${FileSystem.documentDirectory}bellaplus_profile.json`;
+import { lerFotoLocal } from "../utils/perfilLocal";
 
 export default function Profile({ navigation }) {
   const [user, setUser] = useState(null);
@@ -23,23 +22,34 @@ export default function Profile({ navigation }) {
     return unsubscribe;
   }, []);
 
+  // Recarrega nome e foto sempre que a aba ganha foco (ex.: voltando de "Editar perfil")
+  // e quando o usuário logado muda.
   useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", () => {
-      setUser(auth.currentUser);
-      loadProfile();
-    });
+    const unsubscribe = navigation.addListener("focus", loadProfile);
     return unsubscribe;
   }, [navigation]);
 
+  useEffect(() => {
+    loadProfile();
+  }, [user?.uid]);
+
   async function loadProfile() {
+    const current = auth.currentUser;
+    if (!current) {
+      setPhotoUri(null);
+      setSavedName(null);
+      return;
+    }
+
+    setPhotoUri(await lerFotoLocal(current.uid));
+
     try {
-      const info = await FileSystem.getInfoAsync(PROFILE_FILE);
-      if (info.exists) {
-        const data = JSON.parse(await FileSystem.readAsStringAsync(PROFILE_FILE));
-        setPhotoUri(data.photo || null);
-        setSavedName(data.name || null);
-      }
-    } catch (e) {}
+      const snap = await getDoc(doc(db, "usuarios", current.uid));
+      setSavedName(snap.exists() ? snap.data().nome || null : null);
+    } catch {
+      // sem conexão: cai no nome do perfil do Firebase Auth (displayName)
+      setSavedName(null);
+    }
   }
 
   function logout() {
@@ -54,9 +64,10 @@ export default function Profile({ navigation }) {
             try {
               await signOut(auth);
               setUser(null);
-              navigation.navigate("Login");
+              // reset: limpa o histórico, então o botão voltar não retorna ao app deslogado
+              navigation.reset({ index: 0, routes: [{ name: "Login" }] });
             } catch (error) {
-              Alert.alert("Erro", "Nao foi possivel sair da conta.");
+              Alert.alert("Erro", "Não foi possível sair da conta.");
             }
           },
         },
@@ -65,10 +76,11 @@ export default function Profile({ navigation }) {
   }
 
   function getInitials() {
-    const name = savedName || user?.displayName;
+    const name = (savedName || user?.displayName || "").trim();
     if (name) {
-      const parts = name.split(" ");
-      return (parts[0][0] + (parts[parts.length - 1][0] || "")).toUpperCase();
+      const parts = name.split(/\s+/).filter(Boolean);
+      if (parts.length === 1) return parts[0][0].toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
     if (user?.email) {
       return user.email[0].toUpperCase();
@@ -80,17 +92,17 @@ export default function Profile({ navigation }) {
     if (savedName) return savedName;
     if (user?.displayName) return user.displayName;
     if (user?.email) return user.email.split("@")[0];
-    return "Usuario";
+    return "Usuário";
   }
 
   function getEmail() {
-    return user?.email || "usuario@email.com";
+    return user?.email || "";
   }
 
   const options = [
     {
       title: "Minhas compras",
-      subtitle: "Veja seus pedidos e historico",
+      subtitle: "Veja seus pedidos e histórico",
       icon: "receipt-outline",
       action: () => navigation.navigate("Purchases"),
     },
@@ -107,13 +119,13 @@ export default function Profile({ navigation }) {
       action: () => navigation.navigate("EditProfile"),
     },
     {
-      title: "Meus enderecos",
-      subtitle: "Gerencie seus enderecos de entrega",
+      title: "Meus endereços",
+      subtitle: "Gerencie seus endereços de entrega",
       icon: "location-outline",
       action: () => navigation.navigate("Addresses"),
     },
     {
-      title: "Configuracoes",
+      title: "Configurações",
       subtitle: "Preferencias do aplicativo",
       icon: "settings-outline",
       action: () => navigation.navigate("Settings"),
@@ -123,12 +135,14 @@ export default function Profile({ navigation }) {
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.profileBox}>
-        <View style={styles.profileBox}>
-            <TouchableOpacity style={[styles.bellButton, { backgroundColor: theme.surface }]} onPress={logout}>
-            <Ionicons name="exit" size={20} color={theme.text} />
-          <View style={[styles.bellDot, { backgroundColor: theme.surface, borderColor: theme.surface }]} />
+        <TouchableOpacity
+          style={[styles.logoutButton, { backgroundColor: theme.surface }]}
+          onPress={logout}
+          accessibilityRole="button"
+          accessibilityLabel="Sair da conta"
+        >
+          <Ionicons name="exit" size={20} color={theme.text} />
         </TouchableOpacity>
-      </View>
 
         <View style={styles.avatarContainer}>
           {photoUri ? (
@@ -153,9 +167,9 @@ export default function Profile({ navigation }) {
 
       <View style={styles.menu}>
         
-        {options.map((item, index) => (
+        {options.map((item) => (
           <TouchableOpacity
-            key={index}
+            key={item.title}
             style={[styles.card, { backgroundColor: theme.surface }]}
             onPress={item.action}
           >
@@ -170,10 +184,10 @@ export default function Profile({ navigation }) {
           </TouchableOpacity>
         ))}
 
-        <TouchableOpacity style={[styles.logout, { backgroundColor: theme.accent }]} onPress={() => setShowContact(true)}>
-            <Ionicons name="information-circle-sharp" size={20} color="#fff" style={{ marginRight: 8 }} />
-            <Text style={styles.logoutText}>Informações da casa</Text>
-              </TouchableOpacity>
+        <TouchableOpacity style={[styles.infoButton, { backgroundColor: theme.accent }]} onPress={() => setShowContact(true)}>
+          <Ionicons name="information-circle-sharp" size={20} color="#fff" style={{ marginRight: 8 }} />
+          <Text style={styles.infoButtonText}>Informações da casa</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={{ height: 100 }} />
@@ -189,15 +203,6 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingHorizontal: 15,
   },
-bellDot: {
-  position: "absolute",
-  top: 8,
-  right: 8,
-  width: 8,
-  height: 8,
-  borderRadius: 4,
-  borderWidth: 1,
-},
   avatarContainer: {
     position: "relative",
     marginBottom: 15,
@@ -221,7 +226,7 @@ profileBox: {
   marginBottom: 30,
   width: "100%",
 },
-bellButton: {
+logoutButton: {
   position: "absolute",
   top: 0,
   right: 0,
@@ -296,16 +301,15 @@ bellButton: {
   arrow: {
     fontSize: 30,
   },
-  logout: {
+  infoButton: {
     marginTop: 20,
     padding: 18,
     borderRadius: 15,
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "center",
-    
   },
-  logoutText: {
+  infoButtonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
