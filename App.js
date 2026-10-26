@@ -38,6 +38,8 @@ import Checkout from "./Screens/Views/Checkout/Checkout";
 import MeusPedidos from "./Screens/MeusPedidos";
 import TamanhoCombo from "./Screens/TamanhoCombo";
 import Pacotes from "./Screens/Pacotes";
+import PedidoDetalhes from "./Screens/Views/Checkout/PedidoDetalhes";
+
  
 function TabNavigate() {
   const Tab = createBottomTabNavigator();
@@ -235,6 +237,8 @@ function AppContent() {
         <Stack.Screen name="MeusPedidos" component={MeusPedidos} options={{
           headerShown: false
         }} />
+
+      <Stack.Screen name="PedidoDetalhes" component={PedidoDetalhes} options={{ headerShown: false }} />
 
         <Stack.Screen name="EditProfile" component={EditProfile} options={{
           headerShown: false

@@ -32,6 +32,11 @@ const ABAS = [
 
 function statusInfo(status) {
   switch (status) {
+    case "aguardando_pagamento":
+      return { label: "Aguardando pagamento", cor: COLORS.laranjaAviso, fundo: COLORS.laranjaFundo, aba: "andamento" };
+    case "aprovado":
+      return { label: "Pedido aprovado", cor: COLORS.verdeSucesso, fundo: COLORS.verdeFundo, aba: "andamento" };
+    case "em_preparo":
     case "em_preparacao":
       return { label: "Em preparação", cor: COLORS.laranjaAviso, fundo: COLORS.laranjaFundo, aba: "andamento" };
     case "saiu_para_entrega":

@@ -1,18 +1,10 @@
 import { View, Text, StyleSheet, FlatList, Alert, Modal, TouchableOpacity, ScrollView } from 'react-native';
 import { IconButton, Button } from 'react-native-paper';
 import { db as database } from '../../../Firebase/firebaseConfig';
-import {
-  collection,
-  query,
-  orderBy,
-  onSnapshot,
-  doc,
-  updateDoc,
-  serverTimestamp,
-  arrayUnion,
-} from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, serverTimestamp, arrayUnion,} from 'firebase/firestore';
 import { useTheme } from '../../../context/ThemeContext';
 import { useState, useEffect } from "react";
+import { Ionicons } from '@expo/vector-icons';
 
 // Nome amigável de cada status guardado no banco
 const STATUS_LABEL = {
@@ -188,13 +180,13 @@ export default function GerenciarVendas({ navigation }) {
                     </Text>
                   ) : null}
                 </View>
-                <IconButton icon="receipt" iconColor={theme.primary} size={24} />
+                <Ionicons name="receipt-outline" size={24} color={theme.primary} style={{ marginRight: 6 }} />
               </TouchableOpacity>
             );
           }}
           ListEmptyComponent={
             <View style={styles.vazioContainer}>
-              <IconButton icon="cash-register" iconColor={theme.primary} size={80} style={styles.iconeVazio} />
+              <Ionicons name="receipt-outline" size={80} color={theme.primary} style={styles.iconeVazio} />
               <Text style={[styles.txtVazio, { color: theme.primary }]}>Nenhuma venda registrada ainda</Text>
             </View>
           }
