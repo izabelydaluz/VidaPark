@@ -281,7 +281,18 @@ export default function Login({ navigation }) {
                 Entrar
               </Button>
 
-              <TouchableOpacity
+              
+
+              <TouchableOpacity onPress={() => navigation.navigate("Cadastrar")}>
+                <Text style={styles.textoConta}>
+                  Não possui uma conta ainda?
+                  <Text style={styles.cadastro}> Cadastre-se</Text>
+                </Text>
+              </TouchableOpacity>
+
+
+
+            <TouchableOpacity
                 onPress={EsqueciSenha}
                 disabled={enviandoRedefinicao}
                 accessibilityRole="button"
@@ -292,12 +303,6 @@ export default function Login({ navigation }) {
                 </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => navigation.navigate("Cadastrar")}>
-                <Text style={styles.textoConta}>
-                  Não possui uma conta ainda?
-                  <Text style={styles.cadastro}> Cadastre-se</Text>
-                </Text>
-              </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.instagramContainer}
@@ -402,7 +407,7 @@ const styles = StyleSheet.create({
   instagramContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 32,
+    marginTop: 165,
   },
 
   instagramText: {

@@ -3,8 +3,9 @@ import { WebView } from "react-native-webview";
 import { StyleSheet, View, Text, TouchableOpacity, ActivityIndicator, Alert, Image, ScrollView } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import { auth, db } from "../../../Firebase/firebaseConfig";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+
 import { callFunction } from "../Checkout/mercadopago";
+import { collection, addDoc, setDoc, doc, serverTimestamp } from "firebase/firestore";
 
 function formatMoney(value) {
   return `R$ ${Number(value || 0).toFixed(2).replace(".", ",")}`;
@@ -24,6 +25,7 @@ export default function Pagamento({ navigation, route }) {
   const [copiado, setCopiado] = useState(false);
 
   const pollingRef = useRef(null);
+const salvouRef = useRef(false);
 
   useEffect(() => {
     if (!initialCheckoutUrl && !pixData) {
@@ -109,33 +111,43 @@ export default function Pagamento({ navigation, route }) {
     setTimeout(() => setCopiado(false), 2000);
   }
 
-  // Grava o pedido no Firestore só depois que o pagamento é confirmado.
-  const salvarPedido = useCallback(
-    async (statusPagamento, mpPaymentId) => {
-      if (!pedido) return;
+ const salvarPedido = useCallback(
+  async (statusPagamento, mpPaymentId) => {
+    if (!pedido || salvouRef.current) return; // evita gravar duas vezes
+    salvouRef.current = true;
 
-      try {
-        setSalvandoPedido(true);
+    try {
+      setSalvandoPedido(true);
 
-        await addDoc(collection(db, "pedidos"), {
-          ...pedido,
-          status: statusPagamento === "approved" ? "em_preparacao" : "aguardando_pagamento",
-          mpPaymentId: mpPaymentId || null,
-          mpExternalReference: externalRef || null,
-          createdAt: serverTimestamp(),
-        });
-      } catch (e) {
-        console.error("Erro ao salvar pedido:", e);
-        Alert.alert(
-          "Atenção",
-          "O pagamento foi confirmado, mas houve um erro ao registrar seu pedido. Entre em contato com o suporte."
-        );
-      } finally {
-        setSalvandoPedido(false);
+      const status = statusPagamento === "approved" ? "aprovado" : "aguardando_pagamento";
+      const dados = {
+        ...pedido,
+        status,
+        historico: [{ status, em: new Date().toISOString() }],
+        mpPaymentId: mpPaymentId || null,
+        mpExternalReference: externalRef || null,
+        createdAt: serverTimestamp(),
+      };
+
+      if (mpPaymentId) {
+        // id fixo: o mesmo pagamento nunca vira dois pedidos
+        await setDoc(doc(db, "pedidos", `mp_${mpPaymentId}`), dados);
+      } else {
+        await addDoc(collection(db, "pedidos"), dados);
       }
-    },
-    [pedido, externalRef]
-  );
+    } catch (e) {
+      salvouRef.current = false;
+      console.error("Erro ao salvar pedido:", e);
+      Alert.alert(
+        "Atenção",
+        "O pagamento foi confirmado, mas houve um erro ao registrar seu pedido. Entre em contato com o suporte."
+      );
+    } finally {
+      setSalvandoPedido(false);
+    }
+  },
+  [pedido, externalRef]
+);
 
   const finalizarComoAprovado = useCallback(
     async (mpPaymentId) => {

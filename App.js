@@ -16,6 +16,7 @@ import AddProdutos from "./Screens/Views/Admin/AddProdutos";
 import AddPacote from "./Screens/Views/Admin/AddPacote";
 import EditPacote from "./Screens/Views/Admin/EditPacote";
 
+import Galeria from "./Screens/Galeria";
 import Pagamento from "./Screens/Views/Checkout/Pagamento";
 import Cadastrar from "./Screens/Views/Auth/Cadastrar";
 import EditProduct from "./Screens/Views/Admin/EditProduct";
@@ -68,11 +69,13 @@ function TabNavigate() {
     )
   }} />
 
-        <Tab.Screen name="Catalogo" component={CatalogoSalgados}
+
+
+        <Tab.Screen name="Galeria" component={Galeria}
         options={{
           headerShown: false,
           tabBarIcon: ({ color }) => (
-            <Entypo name="shopping-bag" size={20} color={color} />
+            <Entypo name="images" size={20} color={color} />
             
           )
         }} />
@@ -193,7 +196,9 @@ function AppContent() {
           headerShown: false
         }} />
 
-
+<Stack.Screen name="Galeria" component={Galeria} options={{
+          headerShown: false
+        }} />
 
         <Stack.Screen name="catalogoSalgados" component={CatalogoSalgados} options={{
   headerShown: false
@@ -210,6 +215,7 @@ function AppContent() {
         <Stack.Screen name="MonteSeuCombo" component={MonteSeuCombo} options={{
           headerShown: false
         }} />
+
 
 
         <Stack.Screen name="Carrinho" component={Carrinho} options={{

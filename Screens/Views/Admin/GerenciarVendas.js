@@ -1,38 +1,75 @@
 import { View, Text, StyleSheet, FlatList, Alert, Modal, TouchableOpacity, ScrollView } from 'react-native';
 import { IconButton, Button } from 'react-native-paper';
 import { db as database } from '../../../Firebase/firebaseConfig';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  updateDoc,
+  serverTimestamp,
+  arrayUnion,
+} from 'firebase/firestore';
 import { useTheme } from '../../../context/ThemeContext';
 import { useState, useEffect } from "react";
+
+// Nome amigável de cada status guardado no banco
+const STATUS_LABEL = {
+  aguardando_pagamento: 'Aguardando pagamento',
+  aprovado: 'Pedido aprovado',
+  em_preparo: 'Em preparação',
+  em_preparacao: 'Em preparação', // pedidos antigos
+  saiu_para_entrega: 'Saiu para entrega',
+  entregue: 'Entregue',
+  cancelado: 'Cancelado',
+};
+
+// Próximo passo de cada status (vira o botão principal do recibo)
+const PROXIMO = {
+  aprovado: { status: 'em_preparo', label: 'Iniciar preparo' },
+  em_preparo: { status: 'saiu_para_entrega', label: 'Saiu para entrega' },
+  em_preparacao: { status: 'saiu_para_entrega', label: 'Saiu para entrega' },
+  saiu_para_entrega: { status: 'entregue', label: 'Marcar como Entregue' },
+};
+
+const FINAIS = ['entregue', 'cancelado'];
+
+const pad = (n) => String(n).padStart(2, '0');
+
+function formatarDataHoraISO(iso) {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 export default function GerenciarVendas({ navigation }) {
   const { theme } = useTheme();
   const [vendas, setVendas] = useState([]);
-  const [vendaSelecionada, setVendaSelecionada] = useState(null);
+  const [vendaSelecionadaId, setVendaSelecionadaId] = useState(null);
   const [modalVisivel, setModalVisivel] = useState(false);
+  const [atualizando, setAtualizando] = useState(false);
 
-  // ─────────────────────────────────────────────
-  // OPÇÃO 1 (temporária): lê direto da coleção "pedidos",
-  // já que ainda não existe integração real com Mercado Pago
-  // gravando em "payments". Quando essa integração existir
-  // (Opção 2), volte a buscar de "payments" aqui.
-  // ─────────────────────────────────────────────
-  async function carregarVendas() {
-    try {
-      const querySnapshot = await getDocs(collection(database, 'pedidos'));
-      const lista = [];
-      querySnapshot.forEach((doc) => {
-        lista.push({ id: doc.id, ...doc.data() });
-      });
-      setVendas(lista);
-    } catch (error) {
-      console.log("Erro ao buscar vendas: ", error);
-      Alert.alert("Erro", "Não foi possível carregar o histórico de vendas.");
-    }
-  }
+  // O recibo sempre mostra a versão mais recente do pedido
+  const vendaSelecionada = vendas.find((v) => v.id === vendaSelecionadaId) || null;
 
+  // Escuta os pedidos em tempo real: quando um cliente paga ou o status muda,
+  // a lista atualiza sozinha.
   useEffect(() => {
-    carregarVendas();
+    const q = query(collection(database, 'pedidos'), orderBy('createdAt', 'desc'));
+
+    const cancelar = onSnapshot(
+      q,
+      (snapshot) => {
+        setVendas(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
+      },
+      (error) => {
+        console.log("Erro ao buscar vendas: ", error);
+        Alert.alert("Erro", "Não foi possível carregar o histórico de vendas.");
+      }
+    );
+
+    return () => cancelar();
   }, []);
 
   async function alterarStatusVenda(id, novoStatus) {
@@ -42,61 +79,42 @@ export default function GerenciarVendas({ navigation }) {
     }
 
     try {
-      const vendaRef = doc(database, 'pedidos', id);
-      await updateDoc(vendaRef, { status: novoStatus });
+      setAtualizando(true);
 
-      setVendas((prev) =>
-        prev.map((venda) => {
-          if (venda.id === id) {
-            return { ...venda, status: novoStatus };
-          } else {
-            return venda;
-          }
-        })
-      );
-
-      if (vendaSelecionada) {
-        if (vendaSelecionada.id === id) {
-          setVendaSelecionada({ ...vendaSelecionada, status: novoStatus });
-        }
-      }
+      await updateDoc(doc(database, 'pedidos', id), {
+        status: novoStatus,
+        atualizadoEm: serverTimestamp(),
+        historico: arrayUnion({ status: novoStatus, em: new Date().toISOString() }),
+      });
+      // não precisa atualizar o estado local: o onSnapshot faz isso
     } catch (error) {
       console.log(error);
       Alert.alert("Erro", "Falha ao atualizar o status da venda no servidor.");
+    } finally {
+      setAtualizando(false);
     }
   }
 
-  // Traduz os status usados na coleção "pedidos"
-  // (em_preparacao, saiu_para_entrega, entregue, cancelado)
+  function confirmarCancelamento(id) {
+    Alert.alert("Cancelar pedido", "Tem certeza que deseja cancelar este pedido?", [
+      { text: "Não", style: "cancel" },
+      { text: "Cancelar pedido", style: "destructive", onPress: () => alterarStatusVenda(id, 'cancelado') },
+    ]);
+  }
+
   function traduzirStatus(status) {
     if (!status) {
       return 'Pendente';
     }
-
-    const statusLower = status.toLowerCase();
-
-    if (statusLower === 'entregue') {
-      return 'Entregue';
-    }
-    if (statusLower === 'saiu_para_entrega') {
-      return 'Saiu para entrega';
-    }
-    if (statusLower === 'cancelado') {
-      return 'Cancelado';
-    }
-    if (statusLower === 'em_preparacao') {
-      return 'Em preparação';
-    }
-
-    return 'Pendente';
+    return STATUS_LABEL[String(status).toLowerCase()] || 'Pendente';
   }
 
   function obterEstiloStatus(status) {
-    const statusTraduzido = traduzirStatus(status);
-    if (statusTraduzido === 'Entregue') {
+    const s = String(status || '').toLowerCase();
+    if (s === 'entregue') {
       return styles.statusAprovado;
     }
-    if (statusTraduzido === 'Cancelado') {
+    if (s === 'cancelado') {
       return styles.statusRecusado;
     }
     return styles.statusPendente;
@@ -123,12 +141,16 @@ export default function GerenciarVendas({ navigation }) {
 
   function abrirComprovante(venda) {
     if (venda) {
-      setVendaSelecionada(venda);
+      setVendaSelecionadaId(venda.id);
       setModalVisivel(true);
     } else {
       Alert.alert("Erro", "Não foi possível abrir os detalhes desta venda.");
     }
   }
+
+  const statusAtual = String(vendaSelecionada?.status || '').toLowerCase();
+  const proximo = PROXIMO[statusAtual];
+  const finalizado = FINAIS.includes(statusAtual);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -155,6 +177,11 @@ export default function GerenciarVendas({ navigation }) {
                   <Text style={[styles.txtStatus, obterEstiloStatus(item.status)]}>
                     Status: {traduzirStatus(item.status)}
                   </Text>
+                  {item.data ? (
+                    <Text style={[styles.txtEndereco, { color: theme.text }]} numberOfLines={1}>
+                      Entrega: {item.data}{item.horario ? ` às ${item.horario}` : ''}
+                    </Text>
+                  ) : null}
                   {endereco ? (
                     <Text style={[styles.txtEndereco, { color: theme.text }]} numberOfLines={1}>
                       Endereço: {endereco}
@@ -187,11 +214,18 @@ export default function GerenciarVendas({ navigation }) {
               <Text style={styles.reciboLinha}>-----------------------------------------</Text>
             </View>
 
-            <ScrollView contentContainerStyle={styles.reciboCorpo}>
+            <ScrollView style={styles.reciboScroll} contentContainerStyle={styles.reciboCorpo}>
               {vendaSelecionada ? (
                 <>
                   <Text style={styles.reciboTextoLabel}>ID DO PEDIDO:</Text>
                   <Text style={styles.reciboTextoValor}>{vendaSelecionada.id}</Text>
+
+                  {vendaSelecionada.clienteNome ? (
+                    <>
+                      <Text style={styles.reciboTextoLabel}>CLIENTE:</Text>
+                      <Text style={styles.reciboTextoValor}>{vendaSelecionada.clienteNome}</Text>
+                    </>
+                  ) : null}
 
                   <Text style={styles.reciboTextoLabel}>ITENS:</Text>
                   <Text style={styles.reciboTextoValor}>
@@ -203,7 +237,7 @@ export default function GerenciarVendas({ navigation }) {
                     {vendaSelecionada.formaPagamento ? vendaSelecionada.formaPagamento.toUpperCase() : 'NÃO INFORMADO'}
                   </Text>
 
-                  <Text style={styles.reciboTextoLabel}>DATA / HORÁRIO:</Text>
+                  <Text style={styles.reciboTextoLabel}>ENTREGA (DATA / HORÁRIO):</Text>
                   <Text style={styles.reciboTextoValor}>
                     {vendaSelecionada.data || 'N/A'} {vendaSelecionada.horario ? `às ${vendaSelecionada.horario}` : ''}
                   </Text>
@@ -212,6 +246,17 @@ export default function GerenciarVendas({ navigation }) {
                     <>
                       <Text style={styles.reciboTextoLabel}>ENDEREÇO DE ENTREGA:</Text>
                       <Text style={styles.reciboTextoValor}>{vendaSelecionada.endereco.enderecoCompleto}</Text>
+                    </>
+                  ) : null}
+
+                  {Array.isArray(vendaSelecionada.historico) && vendaSelecionada.historico.length > 0 ? (
+                    <>
+                      <Text style={styles.reciboTextoLabel}>HISTÓRICO:</Text>
+                      {vendaSelecionada.historico.map((h, i) => (
+                        <Text key={i} style={styles.reciboHistorico}>
+                          {formatarDataHoraISO(h.em)} — {traduzirStatus(h.status)}
+                        </Text>
+                      ))}
                     </>
                   ) : null}
 
@@ -232,32 +277,33 @@ export default function GerenciarVendas({ navigation }) {
 
             <Text style={styles.reciboLinha}>-----------------------------------------</Text>
 
-            <View style={styles.botoesModal}>
-              <Button
-                mode="contained"
-                buttonColor="#E84890"
-                style={styles.btnAcao}
-                onPress={() => {
-                  if (vendaSelecionada) {
-                    alterarStatusVenda(vendaSelecionada.id, 'entregue');
-                  }
-                }}
-              >
-                Marcar como Entregue
-              </Button>
-              <Button
-                mode="contained"
-                buttonColor="#C93678"
-                style={styles.btnAcao}
-                onPress={() => {
-                  if (vendaSelecionada) {
-                    alterarStatusVenda(vendaSelecionada.id, 'cancelado');
-                  }
-                }}
-              >
-                Cancelar
-              </Button>
-            </View>
+            {vendaSelecionada && !finalizado ? (
+              <View style={styles.botoesModal}>
+                {proximo ? (
+                  <Button
+                    mode="contained"
+                    buttonColor="#E84890"
+                    style={styles.btnAcao}
+                    loading={atualizando}
+                    disabled={atualizando}
+                    onPress={() => alterarStatusVenda(vendaSelecionada.id, proximo.status)}
+                  >
+                    {proximo.label}
+                  </Button>
+                ) : (
+                  <Text style={styles.aguardandoTexto}>Aguardando confirmação do pagamento</Text>
+                )}
+                <Button
+                  mode="contained"
+                  buttonColor="#C93678"
+                  style={styles.btnAcao}
+                  disabled={atualizando}
+                  onPress={() => confirmarCancelamento(vendaSelecionada.id)}
+                >
+                  Cancelar
+                </Button>
+              </View>
+            ) : null}
 
             <Button
               mode="outlined"
@@ -284,13 +330,10 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 3, height: 3 },
     textShadowRadius: 6,
     letterSpacing: 2,
-
-
   },
   container: {
     flex: 1,
     paddingTop: 40,
-
   },
   cardContainer: {
     flex: 1,
@@ -386,6 +429,9 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     textAlign: 'center',
   },
+  reciboScroll: {
+    maxHeight: 380,
+  },
   reciboCorpo: {
     paddingVertical: 10,
   },
@@ -399,6 +445,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#202040',
     fontWeight: '500',
+  },
+  reciboHistorico: {
+    fontSize: 12,
+    color: '#202040',
+    marginTop: 2,
   },
   reciboTotalLabel: {
     fontSize: 13,
@@ -422,13 +473,20 @@ const styles = StyleSheet.create({
   botoesModal: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginVertical: 10,
   },
   btnAcao: {
     flex: 1,
     marginHorizontal: 5,
   },
+  aguardandoTexto: {
+    flex: 1,
+    marginHorizontal: 5,
+    fontSize: 12,
+    color: '#6B6B85',
+  },
   btnFechar: {
     marginTop: 5,
-  }
+  },
 });

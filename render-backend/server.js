@@ -41,22 +41,49 @@ function authHeaders() {
 }
 
 function buildPayerInfo(pi) {
-  const p = (pi.name || "").split(" ");
-  return {
+  const nome = (pi.name || "").trim();
+  const partes = nome.split(/\s+/);
+  const cpf = String(pi.cpf || "").replace(/\D/g, "");
+
+  const payer = {
     email: pi.email,
-    first_name: p[0] || "Cliente",
-    last_name: p.slice(1).join(" ") || p[0] || "Cliente",
-    identification: { type: "CPF", number: pi.cpf ? pi.cpf.replace(/\D/g, "") : "00000000000" },
+    first_name: partes[0] || "Cliente",
+    last_name: partes.slice(1).join(" ") || "Cliente",
   };
+
+  if (cpf.length === 11) {
+    payer.identification = {
+      type: "CPF",
+      number: cpf,
+    };
+  }
+
+  return payer;
 }
 
 function ok(res, data) {
   res.status(200).json(data);
 }
 
-function fail(res, code, msg) {
-  res.status(200).json({ error: { status: code, message: msg } });
-}
+const causes = Array.isArray(mpErr?.cause) ? mpErr.cause : [];
+
+  const causeStr = causes
+    .map(c => `Código ${c.code || "?"}: ${c.description || ""}`)
+    .join(" | ");
+
+  const detalhe =
+    causeStr ||
+    mpErr?.message ||
+    mpErr?.error ||
+    e.message ||
+    "Erro desconhecido";
+
+  return fail(
+    res,
+    "INTERNAL",
+    `Erro MP (${statusCode ?? "sem resposta"}): ${detalhe}`
+  );
+
 
 app.post("/createPayment", async (req, res) => {
   const data = req.body || {};
