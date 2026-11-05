@@ -202,6 +202,9 @@ function AppContent() {
           headerShown: false
         }} />
 
+        <Stack.Screen name="GaleriaAdmin" component={Galeria} initialParams={{ admin: true }} 
+        options={{ headerShown: false }} />
+
         <Stack.Screen name="catalogoSalgados" component={CatalogoSalgados} options={{
   headerShown: false
 }} />
