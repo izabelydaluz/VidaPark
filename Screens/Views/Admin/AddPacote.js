@@ -25,7 +25,7 @@ function SecaoLista({
 }) {
     const qtd = converterLista(valor).length;
 
-    const resumo =
+    const resumo = //operador ternário.
         qtd === 0 ? "Opcional" : qtd === 1 ? "1 item" : `${qtd} itens`;
 
     return (
@@ -57,8 +57,8 @@ function SecaoLista({
                         value={valor}
                         onChangeText={onChange}
                         placeholderTextColor="#e58aaa"
-                        multiline
-                        autoFocus
+                        multiline //Permite escrevermos várias linhas no campo de texto.
+                        autoFocus //Coloca o cursor automaticamente no campo quando ele aparece.
                     />
                 </View>
             )}
@@ -67,7 +67,7 @@ function SecaoLista({
 }
 
 export default function AddPacote({ navigation, route }) {
-    const { aoSalvar } = route.params || {};
+    const { aoSalvar } = route.params || {}; //Se não houver parâmetros, utiliza um objeto vazio
 
     const [nome, setNome] = useState("");
     const [precoInicial, setPrecoInicial] = useState("");
@@ -96,7 +96,7 @@ export default function AddPacote({ navigation, route }) {
 
     const alternarSecao = (chave) =>
         setAbertas((anterior) => ({
-            ...anterior,
+            ...anterior, //Operador Spread: Ele copia todas as propriedades do objeto anterior
             [chave]: !anterior[chave],
         }));
 
