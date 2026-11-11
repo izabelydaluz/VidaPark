@@ -6,11 +6,11 @@ import { useState } from "react";
 import { addDoc, collection } from "firebase/firestore";
 import * as ImagePicker from "expo-image-picker";
 
-const converterLista = (texto) => {
+const converterLista = (texto) => { //Transformar um texto digitado pelo usuário em uma lista (array).
     return texto
-        .split("\n")
-        .map((item) => item.trim())
-        .filter((item) => item.length > 0);
+        .split("\n") //Separar o texto em linhas
+        .map((item) => item.trim()) // Percorrer cada linha e remover espaços em branco no início e no final.
+        .filter((item) => item.length > 0); // Filtrar apenas os itens que não estão vazios.
 };
 
 /* Seção recolhível para os campos de lista (um item por linha).
