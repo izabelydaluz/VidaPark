@@ -1,4 +1,5 @@
-import { View, Text, TextInput, StyleSheet, Image, Alert, ScrollView, Switch, } from "react-native";
+
+import { View, Text, TextInput, StyleSheet, Image, Alert, ScrollView, Switch } from "react-native";
 import { Button } from "react-native-paper";
 import { db } from "../../../Firebase/firebaseConfig";
 import { useState } from "react";
@@ -85,9 +86,7 @@ export default function EditPacote({ navigation, route }) {
             null
         );
 
-    // ─────────────────────────────────────────────
     // ESCOLHER IMAGEM
-    // ─────────────────────────────────────────────
 
     const escolherImagem = async () => {
         try {
@@ -129,15 +128,11 @@ export default function EditPacote({ navigation, route }) {
         }
     };
 
-    // ─────────────────────────────────────────────
     // CONVERTER IMAGEM
-    // ─────────────────────────────────────────────
 
     const converterImagemParaBase64 = imagemParaDataUri;
 
-    // ─────────────────────────────────────────────
     // CONVERTER LISTA
-    // ─────────────────────────────────────────────
 
     const converterLista = (texto) => {
         return texto
@@ -146,9 +141,7 @@ export default function EditPacote({ navigation, route }) {
             .filter((item) => item.length > 0);
     };
 
-    // ─────────────────────────────────────────────
     // SALVAR
-    // ─────────────────────────────────────────────
 
     const salvar = async () => {
         try {
@@ -271,6 +264,11 @@ export default function EditPacote({ navigation, route }) {
                 Editar Pacote
             </Text>
 
+            {/* NOME DO PACOTE */}
+            <Text style={styles.subtitulo}>
+                Nome do pacote
+            </Text>
+
             <TextInput
                 style={styles.barra}
                 placeholder="Nome do pacote"
@@ -278,6 +276,11 @@ export default function EditPacote({ navigation, route }) {
                 onChangeText={setNome}
                 placeholderTextColor="#e58aaa"
             />
+
+            {/* PREÇO INICIAL */}
+            <Text style={styles.subtitulo}>
+                Preço inicial
+            </Text>
 
             <TextInput
                 style={styles.barra}
@@ -288,6 +291,11 @@ export default function EditPacote({ navigation, route }) {
                 keyboardType="decimal-pad"
             />
 
+            {/* MÁXIMO DE CONVIDADOS */}
+            <Text style={styles.subtitulo}>
+                Máximo de convidados
+            </Text>
+
             <TextInput
                 style={styles.barra}
                 placeholder="Máximo de convidados"
@@ -296,6 +304,11 @@ export default function EditPacote({ navigation, route }) {
                 placeholderTextColor="#e58aaa"
                 keyboardType="numeric"
             />
+
+            {/* DURAÇÃO EM HORAS */}
+            <Text style={styles.subtitulo}>
+                Duração em horas
+            </Text>
 
             <TextInput
                 style={styles.barra}
@@ -306,6 +319,11 @@ export default function EditPacote({ navigation, route }) {
                 keyboardType="numeric"
             />
 
+            {/* AMBIENTE */}
+            <Text style={styles.subtitulo}>
+                Ambiente
+            </Text>
+
             <TextInput
                 style={styles.barra}
                 placeholder="Ambiente"
@@ -313,6 +331,11 @@ export default function EditPacote({ navigation, route }) {
                 onChangeText={setAmbiente}
                 placeholderTextColor="#e58aaa"
             />
+
+            {/* DESCRIÇÃO */}
+            <Text style={styles.subtitulo}>
+                Descrição
+            </Text>
 
             <TextInput
                 style={[
@@ -326,6 +349,7 @@ export default function EditPacote({ navigation, route }) {
                 multiline
             />
 
+            {/* DESTAQUES */}
             <Text style={styles.subtitulo}>
                 Destaques
             </Text>
@@ -342,6 +366,7 @@ export default function EditPacote({ navigation, route }) {
                 multiline
             />
 
+            {/* O QUE INCLUI */}
             <Text style={styles.subtitulo}>
                 O que inclui
             </Text>
@@ -358,6 +383,7 @@ export default function EditPacote({ navigation, route }) {
                 multiline
             />
 
+            {/* ESTRUTURA */}
             <Text style={styles.subtitulo}>
                 Estrutura
             </Text>
@@ -374,6 +400,7 @@ export default function EditPacote({ navigation, route }) {
                 multiline
             />
 
+            {/* REGRAS */}
             <Text style={styles.subtitulo}>
                 Regras
             </Text>
