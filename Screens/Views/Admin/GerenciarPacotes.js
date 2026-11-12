@@ -125,9 +125,7 @@ export default function GerenciarPacotes({ navigation }) {
   // =========================================================
 
   function adicionarPacote() {
-    navigation.navigate("AddPacote", {
-      aoSalvar: carregarPacotes,
-    });
+    navigation.navigate("AddPacote");
   }
 
   // =========================================================

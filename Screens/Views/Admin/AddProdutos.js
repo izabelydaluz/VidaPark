@@ -4,10 +4,9 @@ import { db as database } from '../../../Firebase/firebaseConfig';
 import { useState } from 'react';
 import { addDoc, collection } from 'firebase/firestore';
 import * as ImagePicker from 'expo-image-picker';
+import { imagemParaDataUri } from "../utils/imagem";
 
 export default function AddProdutos({ navigation, route }) {
-
-    const { aoSalvar } = route.params || {};
 
     const [nome, setNome] = useState('');
     const [valor, setValor] = useState('');
@@ -56,40 +55,7 @@ export default function AddProdutos({ navigation, route }) {
         }
     };
 
-    const converterImagemParaBase64 = async (uri) => {
-
-        try {
-
-            const response = await fetch(uri);
-
-            if (!response.ok) {
-                throw new Error('Não foi possível carregar a imagem.');
-            }
-
-            const blob = await response.blob();
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    resolve(reader.result);
-                };
-                reader.onerror = () => {
-                    reject(
-                        new Error('Erro ao converter a imagem.')
-                    );
-                };
-
-                reader.readAsDataURL(blob);
-            });
-
-        } catch (error) {
-
-            console.log(
-                'Erro ao converter imagem:',
-                error
-            );
-            throw error;
-        }
-    };
+    const converterImagemParaBase64 = imagemParaDataUri;
 
     const CadastrarProdutos = async () => {
 
@@ -199,12 +165,7 @@ export default function AddProdutos({ navigation, route }) {
                     {
                         text: 'OK',
                         onPress: () => {
-                            navigation.goBack();
-                            if (aoSalvar) {
-                                setTimeout(() => {
-                                    aoSalvar();
-                                }, 100);
-                            }
+                            navigation.goBack(); // a lista recarrega sozinha ao ganhar foco
                         },
                     },
                 ]

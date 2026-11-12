@@ -4,6 +4,7 @@ import { db as database } from '../../../Firebase/firebaseConfig';
 import { useState, useEffect } from 'react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import * as ImagePicker from 'expo-image-picker';
+import { imagemParaDataUri } from "../utils/imagem";
 
 export default function EditProduct({ navigation, route }) {
     const { produtoId } = route.params;
@@ -55,13 +56,7 @@ export default function EditProduct({ navigation, route }) {
             let imagemBase64 = imagem;
 
             if (imagem && imagem.startsWith('file://')) {
-                const response = await fetch(imagem);
-                const blob = await response.blob();
-                imagemBase64 = await new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result);
-                    reader.readAsDataURL(blob);
-                });
+                imagemBase64 = await imagemParaDataUri(imagem);
             }
 
             await updateDoc(doc(database, 'salgados', produtoId), {

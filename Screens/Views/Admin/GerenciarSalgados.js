@@ -87,7 +87,7 @@ export default function GerenciarSalgados({ navigation }) {
   }
 
   function AdicionarProdutos() {
-    navigation.navigate("AddProdutos", { aoSalvar: carregarProduto });
+    navigation.navigate("AddProdutos");
   }
 
   function formatarValor(valor) {

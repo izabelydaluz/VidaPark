@@ -5,12 +5,13 @@ import { db } from "../../../Firebase/firebaseConfig";
 import { useState } from "react";
 import { addDoc, collection } from "firebase/firestore";
 import * as ImagePicker from "expo-image-picker";
+import { imagemParaDataUri } from "../utils/imagem";
 
-const converterLista = (texto) => { //Transformar um texto digitado pelo usuário em uma lista (array).
+const converterLista = (texto) => {
     return texto
-        .split("\n") //Separar o texto em linhas
-        .map((item) => item.trim()) // Percorrer cada linha e remover espaços em branco no início e no final.
-        .filter((item) => item.length > 0); // Filtrar apenas os itens que não estão vazios.
+        .split("\n")
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0);
 };
 
 /* Seção recolhível para os campos de lista (um item por linha).
@@ -25,7 +26,7 @@ function SecaoLista({
 }) {
     const qtd = converterLista(valor).length;
 
-    const resumo = //operador ternário.
+    const resumo =
         qtd === 0 ? "Opcional" : qtd === 1 ? "1 item" : `${qtd} itens`;
 
     return (
@@ -57,8 +58,8 @@ function SecaoLista({
                         value={valor}
                         onChangeText={onChange}
                         placeholderTextColor="#e58aaa"
-                        multiline //Permite escrevermos várias linhas no campo de texto.
-                        autoFocus //Coloca o cursor automaticamente no campo quando ele aparece.
+                        multiline
+                        autoFocus
                     />
                 </View>
             )}
@@ -67,7 +68,6 @@ function SecaoLista({
 }
 
 export default function AddPacote({ navigation, route }) {
-    const { aoSalvar } = route.params || {}; //Se não houver parâmetros, utiliza um objeto vazio
 
     const [nome, setNome] = useState("");
     const [precoInicial, setPrecoInicial] = useState("");
@@ -96,7 +96,7 @@ export default function AddPacote({ navigation, route }) {
 
     const alternarSecao = (chave) =>
         setAbertas((anterior) => ({
-            ...anterior, //Operador Spread: Ele copia todas as propriedades do objeto anterior
+            ...anterior,
             [chave]: !anterior[chave],
         }));
 
@@ -134,38 +134,7 @@ export default function AddPacote({ navigation, route }) {
         }
     };
 
-    const converterImagemParaBase64 = async (uri) => {
-        try {
-            const response = await fetch(uri);
-
-            if (!response.ok) {
-                throw new Error(
-                    "Não foi possível carregar a imagem."
-                );
-            }
-
-            const blob = await response.blob();
-
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-
-                reader.onloadend = () => {
-                    resolve(reader.result);
-                };
-
-                reader.onerror = () => {
-                    reject(
-                        new Error("Erro ao converter a imagem.")
-                    );
-                };
-
-                reader.readAsDataURL(blob);
-            });
-        } catch (error) {
-            console.log("Erro ao converter imagem:", error);
-            throw error;
-        }
-    };
+    const converterImagemParaBase64 = imagemParaDataUri;
 
     const cadastrarPacote = async () => {
         try {
@@ -264,13 +233,7 @@ export default function AddPacote({ navigation, route }) {
                     {
                         text: "OK",
                         onPress: () => {
-                            navigation.goBack();
-
-                            if (aoSalvar) {
-                                setTimeout(() => {
-                                    aoSalvar();
-                                }, 100);
-                            }
+                            navigation.goBack(); // a lista recarrega sozinha ao ganhar foco
                         },
                     },
                 ]

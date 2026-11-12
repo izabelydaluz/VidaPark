@@ -4,6 +4,7 @@ import { db } from "../../../Firebase/firebaseConfig";
 import { useState } from "react";
 import { doc, updateDoc } from "firebase/firestore";
 import * as ImagePicker from "expo-image-picker";
+import { imagemParaDataUri } from "../utils/imagem";
 
 export default function EditPacote({ navigation, route }) {
     const { pacote } = route.params;
@@ -132,35 +133,7 @@ export default function EditPacote({ navigation, route }) {
     // CONVERTER IMAGEM
     // ─────────────────────────────────────────────
 
-    const converterImagemParaBase64 = async (uri) => {
-        const response = await fetch(uri);
-
-        if (!response.ok) {
-            throw new Error(
-                "Não foi possível carregar a imagem."
-            );
-        }
-
-        const blob = await response.blob();
-
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-
-            reader.onloadend = () => {
-                resolve(reader.result);
-            };
-
-            reader.onerror = () => {
-                reject(
-                    new Error(
-                        "Erro ao converter a imagem."
-                    )
-                );
-            };
-
-            reader.readAsDataURL(blob);
-        });
-    };
+    const converterImagemParaBase64 = imagemParaDataUri;
 
     // ─────────────────────────────────────────────
     // CONVERTER LISTA
