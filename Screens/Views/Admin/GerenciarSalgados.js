@@ -22,18 +22,10 @@ const COLORS = {
   vermelhoExcluir: "#EF4444",
 };
 
-const CATEGORIAS = [
-  { id: "todos", label: "Todos", icon: "grid-outline" },
-  { id: "salgados", label: "Salgados", icon: "fast-food-outline" },
-  { id: "doces", label: "Doces", icon: "ice-cream-outline" },
-  { id: "bebidas", label: "Bebidas", icon: "cafe-outline" },
-];
-
 export default function GerenciarSalgados({ navigation }) {
   const [produtos, setProdutos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busca, setBusca] = useState("");
-  const [categoriaAtiva, setCategoriaAtiva] = useState("todos");
 
   async function carregarProduto() {
     try {
@@ -97,18 +89,13 @@ export default function GerenciarSalgados({ navigation }) {
 
   const produtosFiltrados = useMemo(() => {
     return produtos.filter((item) => {
-      const categoriaItem = (item.categoria || "salgados").toLowerCase();
-
-      const categoriaOk =
-        categoriaAtiva === "todos" || categoriaItem === categoriaAtiva;
-
       const buscaOk =
         !busca ||
         (item.nome || "").toLowerCase().includes(busca.toLowerCase());
 
-      return categoriaOk && buscaOk;
+      return buscaOk;
     });
-  }, [produtos, busca, categoriaAtiva]);
+  }, [produtos, busca]);
 
   return (
     <View style={styles.container}>
@@ -149,42 +136,6 @@ export default function GerenciarSalgados({ navigation }) {
                 </TouchableOpacity>
               )}
             </View>
-
-            {/* CATEGORIAS */}
-            <FlatList
-              data={CATEGORIAS}
-              horizontal
-              keyExtractor={(item) => item.id}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.categoriasList}
-              renderItem={({ item }) => {
-                const ativo = categoriaAtiva === item.id;
-                return (
-                  <TouchableOpacity
-                    style={[
-                      styles.categoriaPill,
-                      ativo && styles.categoriaPillAtiva,
-                    ]}
-                    onPress={() => setCategoriaAtiva(item.id)}
-                  >
-                    <Ionicons
-                      name={item.icon}
-                      size={14}
-                      color={ativo ? COLORS.branco : COLORS.textoSecundario}
-                      style={{ marginRight: 6 }}
-                    />
-                    <Text
-                      style={[
-                        styles.categoriaLabel,
-                        ativo && styles.categoriaLabelAtiva,
-                      ]}
-                    >
-                      {item.label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              }}
-            />
           </>
         }
         renderItem={({ item }) => {
@@ -359,6 +310,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 12,
     marginHorizontal: 16,
+    marginBottom: 14,
   },
 
   searchInput: {
@@ -366,40 +318,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     marginLeft: 8,
     fontSize: 14,
-    color: COLORS.branco,
-  },
-
-  /* CATEGORIAS */
-  categoriasList: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    gap: 8,
-  },
-
-  categoriaPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 20,
-    backgroundColor: COLORS.card,
-    borderWidth: 1,
-    borderColor: COLORS.borda,
-    marginRight: 8,
-  },
-
-  categoriaPillAtiva: {
-    backgroundColor: COLORS.rosa,
-    borderColor: COLORS.rosa,
-  },
-
-  categoriaLabel: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: COLORS.textoSecundario,
-  },
-
-  categoriaLabelAtiva: {
     color: COLORS.branco,
   },
 
