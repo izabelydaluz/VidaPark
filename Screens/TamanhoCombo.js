@@ -49,6 +49,16 @@ export default function TamanhoCombo({ navigation }) {
       ]}
       contentContainerStyle={styles.content}
     >
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={styles.backButton}
+        accessibilityRole="button"
+        accessibilityLabel="Voltar"
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <Ionicons name="chevron-back" size={26} color={theme.primary} />
+      </TouchableOpacity>
+
       <View style={styles.header}>
         <Text
           style={[
@@ -137,6 +147,14 @@ const styles = StyleSheet.create({
 
   content: {
     paddingBottom: 40,
+  },
+
+  backButton: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    zIndex: 10,
+    padding: 6,
   },
 
   header: {

@@ -199,7 +199,7 @@ export default function MonteSeuCombo({ route, navigation }) {
           <Ionicons name="chevron-back" size={22} color={theme.text} />
         </TouchableOpacity>
 
-        <Text style={[styles.headerTitle, { color: theme.surface }]}>{editando ? "Editar combo" : "Monte seu combo"}</Text>
+        <Text style={[styles.headerTitle, { color: theme.accent }]}>{editando ? "Editar combo" : "Monte seu combo"}</Text>
 
         <TouchableOpacity
           style={styles.iconButton}

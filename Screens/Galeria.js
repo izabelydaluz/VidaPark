@@ -30,7 +30,7 @@ function calcRatio(width, height) {
 //  - Galeria só para ver (clientes): <Tab.Screen name="Galeria" component={Galeria} />
 //  - Galeria do admin (adicionar / selecionar / excluir):
 //    <Stack.Screen name="GaleriaAdmin" component={Galeria} initialParams={{ admin: true }} />
-export default function GaleriaScreen({ route }) {
+export default function GaleriaScreen({ route, navigation }) {
   const admin = route?.params?.admin === true;
 
   const { theme } = useTheme();
@@ -335,6 +335,18 @@ async function enviarFoto(asset) {
       >
         {/* Cabeçalho */}
         <View style={styles.header}>
+          {admin && (
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={styles.backButton}
+              accessibilityRole="button"
+              accessibilityLabel="Voltar"
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons name="chevron-back" size={26} color={theme.accent} />
+            </TouchableOpacity>
+          )}
+
           <View style={{ flex: 1 }}>
             <Text style={styles.eyebrow}>VIDA PARK</Text>
             <Text style={styles.title}>Conheça nosso espaço</Text>
@@ -555,6 +567,15 @@ function createStyles(theme) {
       paddingHorizontal: PADDING,
       paddingTop: 20,
       paddingBottom: 8,
+    },
+    backButton: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      alignItems: "center",
+      justifyContent: "center",
+      alignSelf: "flex-start",
+      marginRight: 8,
     },
     eyebrow: {
       color: theme.accent,

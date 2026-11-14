@@ -39,6 +39,7 @@ import MeusPedidos from "./Screens/MeusPedidos";
 import TamanhoCombo from "./Screens/TamanhoCombo";
 import Pacotes from "./Screens/Pacotes";
 import PedidoDetalhes from "./Screens/Views/Checkout/PedidoDetalhes";
+import AvaliarPedido from "./Screens/AvaliarPedido";
 
  
 function TabNavigate() {
@@ -242,6 +243,8 @@ function AppContent() {
         }} />
 
       <Stack.Screen name="PedidoDetalhes" component={PedidoDetalhes} options={{ headerShown: false }} />
+
+        <Stack.Screen name="AvaliarPedido" component={AvaliarPedido} options={{ headerShown: false }} />
 
         <Stack.Screen name="EditProfile" component={EditProfile} options={{
           headerShown: false

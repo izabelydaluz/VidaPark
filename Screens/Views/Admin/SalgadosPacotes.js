@@ -37,6 +37,16 @@ export default function SalgadosPacotes({ navigation }) {
 
   return (
     <ScrollView style={[ styles.container,  {  backgroundColor: theme.background, },]} contentContainerStyle={styles.content}>
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={styles.backButton}
+        accessibilityRole="button"
+        accessibilityLabel="Voltar"
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <Ionicons name="chevron-back" size={26} color={theme.accent} />
+      </TouchableOpacity>
+
       <View style={styles.header}>
         <Text style={[  styles.title, { color: theme.primary, },]}>O que deseja editar hoje? </Text>
         <Text style={[ styles.description,{  color: theme.textSecondary,},]} > Escolha uma das opções abaixo para continuar </Text>
@@ -89,6 +99,14 @@ const styles = StyleSheet.create({
 
   content: {
     paddingBottom: 40,
+  },
+
+  backButton: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    zIndex: 10,
+    padding: 6,
   },
 
   header: {

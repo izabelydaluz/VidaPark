@@ -121,6 +121,16 @@ export default function MeusPedidos({ navigation }) {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+          accessibilityRole="button"
+          accessibilityLabel="Voltar"
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="chevron-back" size={26} color={COLORS.rosaVidaPark} />
+        </TouchableOpacity>
+
         <Text style={styles.headerTitle}>Meus pedidos</Text>
       </View>
 
@@ -209,6 +219,16 @@ const styles = StyleSheet.create({
     paddingTop: 55,
     paddingHorizontal: 20,
     paddingBottom: 18,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  backButton: {
+    width: 34,
+    height: 34,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: -6,
+    marginRight: 2,
   },
   headerTitle: {
     color: COLORS.branco,

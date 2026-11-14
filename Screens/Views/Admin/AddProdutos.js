@@ -1,5 +1,6 @@
-import { View, Text, TextInput, StyleSheet, Image, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Image, Alert, TouchableOpacity } from 'react-native';
 import { Button } from 'react-native-paper';
+import { Ionicons } from "@expo/vector-icons";
 import { db as database } from '../../../Firebase/firebaseConfig';
 import { useState } from 'react';
 import { addDoc, collection } from 'firebase/firestore';
@@ -212,6 +213,16 @@ export default function AddProdutos({ navigation, route }) {
 
         <View style={styles.container}>
 
+            <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={styles.backButton}
+                accessibilityRole="button"
+                accessibilityLabel="Voltar"
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+                <Ionicons name="chevron-back" size={26} color="#E84890" />
+            </TouchableOpacity>
+
             <Text style={styles.txt}>
                 Adicionar Produtos
             </Text>
@@ -309,6 +320,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#202040',
         padding: 20,
+    },
+
+    backButton: {
+        position: 'absolute',
+        top: 40,
+        left: 20,
+        zIndex: 10,
+        padding: 6,
     },
 
     GaleriaButton: {

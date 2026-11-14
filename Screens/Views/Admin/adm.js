@@ -6,7 +6,8 @@ import { signOut } from "firebase/auth";
 export default function ADM({ navigation }) {
   function handleLogout() {
     signOut(auth).then(() => {
-      navigation.navigate('Login');
+      // reset limpa o histórico: o botão "voltar" não retorna mais ao painel.
+      navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
     });
   }
 

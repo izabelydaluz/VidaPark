@@ -10,7 +10,7 @@ import { useTheme } from "../context/ThemeContext";
 
 const CATEGORIAS = ["Todos", "Infantil", "Teen", "Adulto", "Corporativo"];
 
-export default function Pacotes() {
+export default function Pacotes({ navigation }) {
   const [pacotes, setPacotes] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(false);
@@ -144,7 +144,19 @@ export default function Pacotes() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Cabeçalho */}
-      <Text style={[styles.titulo, { color: theme.primary }]}>Pacotes de Festa</Text>
+      <View style={styles.titleRow}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+          accessibilityRole="button"
+          accessibilityLabel="Voltar"
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="chevron-back" size={26} color={theme.accent} />
+        </TouchableOpacity>
+
+        <Text style={[styles.titulo, { color: theme.primary }]}>Pacotes de Festa</Text>
+      </View>
       <Text style={[styles.subtitulo, { color: theme.textSecondary }]}>
         Escolha o pacote ideal para o seu evento
       </Text>
@@ -228,6 +240,18 @@ export default function Pacotes() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingTop: 55, paddingHorizontal: 16 },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  backButton: {
+    width: 34,
+    height: 34,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: -6,
+    marginRight: 2,
+  },
   titulo: { fontSize: 24, fontWeight: "bold" },
   subtitulo: { fontSize: 13, marginTop: 2, marginBottom: 14 },
   busca: {

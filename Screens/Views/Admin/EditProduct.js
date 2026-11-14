@@ -1,5 +1,6 @@
-import { View, Text, TextInput, StyleSheet, Image, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Image, Alert, TouchableOpacity } from 'react-native';
 import { Button } from "react-native-paper";
+import { Ionicons } from "@expo/vector-icons";
 import { db as database } from '../../../Firebase/firebaseConfig';
 import { useState, useEffect } from 'react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -89,6 +90,16 @@ export default function EditProduct({ navigation, route }) {
     }
     return (
         <View style={styles.container}>
+            <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={styles.backButton}
+                accessibilityRole="button"
+                accessibilityLabel="Voltar"
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+                <Ionicons name="chevron-back" size={26} color="#E84890" />
+            </TouchableOpacity>
+
             <Text style={styles.txt}>Editar Produto</Text>
             
             <TextInput style={styles.barra} placeholder="Nome" value={nome} onChangeText={setNome} placeholderTextColor={'#e58aaa'} />
@@ -135,6 +146,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#290814',
+    },
+    backButton: {
+        position: 'absolute',
+        top: 40,
+        left: 20,
+        zIndex: 10,
+        padding: 6,
     },
     GaleriaButton: {
         width: 280,

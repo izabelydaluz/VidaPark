@@ -17,7 +17,7 @@ const COLORS = {
   textoSecundario: "#9494B8",
   textoMutado: "#6B6B90",
   verde: "#22C55E",
-  verdeFundo: "rgba(34, 197, 94, 0.15)",
+  vFerdeFundo: "rgba(34, 197, 94, 0.15)",
   azulEditar: "#4C6EF5",
   vermelhoExcluir: "#EF4444",
 };

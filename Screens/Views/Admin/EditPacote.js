@@ -1,6 +1,7 @@
 
-import { View, Text, TextInput, StyleSheet, Image, Alert, ScrollView, Switch } from "react-native";
+import { View, Text, TextInput, StyleSheet, Image, Alert, ScrollView, Switch, TouchableOpacity } from "react-native";
 import { Button } from "react-native-paper";
+import { Ionicons } from "@expo/vector-icons";
 import { db } from "../../../Firebase/firebaseConfig";
 import { useState } from "react";
 import { doc, updateDoc } from "firebase/firestore";
@@ -255,11 +256,22 @@ export default function EditPacote({ navigation, route }) {
     };
 
     return (
-        <ScrollView
-            style={styles.scroll}
-            contentContainerStyle={styles.container}
-            keyboardShouldPersistTaps="handled"
-        >
+        <View style={styles.wrapper}>
+            <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={styles.backButton}
+                accessibilityRole="button"
+                accessibilityLabel="Voltar"
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+                <Ionicons name="chevron-back" size={26} color="#E84890" />
+            </TouchableOpacity>
+
+            <ScrollView
+                style={styles.scroll}
+                contentContainerStyle={styles.container}
+                keyboardShouldPersistTaps="handled"
+            >
             <Text style={styles.txt}>
                 Editar Pacote
             </Text>
@@ -500,6 +512,7 @@ export default function EditPacote({ navigation, route }) {
                 </Button>
             </View>
         </ScrollView>
+        </View>
     );
 }
 
@@ -507,6 +520,19 @@ const styles = StyleSheet.create({
     scroll: {
         flex: 1,
         backgroundColor: "#202040",
+    },
+
+    wrapper: {
+        flex: 1,
+        backgroundColor: "#202040",
+    },
+
+    backButton: {
+        position: "absolute",
+        top: 40,
+        left: 20,
+        zIndex: 10,
+        padding: 6,
     },
 
     container: {

@@ -257,6 +257,16 @@ export default function AddPacote({ navigation, route }) {
             style={styles.raiz}
             behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
+            <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={styles.backButton}
+                accessibilityRole="button"
+                accessibilityLabel="Voltar"
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+                <Ionicons name="chevron-back" size={26} color="#E84890" />
+            </TouchableOpacity>
+
             <ScrollView
                 style={styles.scroll}
                 contentContainerStyle={styles.container}
@@ -474,6 +484,14 @@ const styles = StyleSheet.create({
     raiz: {
         flex: 1,
         backgroundColor: "#202040",
+    },
+
+    backButton: {
+        position: "absolute",
+        top: 40,
+        left: 16,
+        zIndex: 10,
+        padding: 6,
     },
 
     scroll: {

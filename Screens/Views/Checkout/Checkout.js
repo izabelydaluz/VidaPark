@@ -424,7 +424,7 @@ export default function Checkout({ navigation, route }) {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
-          <Ionicons name="chevron-back" size={22} color={COLORS.branco} />
+          <Ionicons name="chevron-back" size={22} color={COLORS.rosaVidaPark} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Checkout</Text>
         <View style={styles.iconButton} />
@@ -670,7 +670,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   headerTitle: {
-    color: COLORS.branco,
+    color: COLORS.rosaVidaPark,
     fontSize: 17,
     fontWeight: "700",
   },
